@@ -18,6 +18,7 @@ client = TestClient(app)
 @pytest.fixture(autouse=True)
 def fresh(monkeypatch):
     monkeypatch.delenv("NEBIUS_API_KEY", raising=False)
+    monkeypatch.delenv("VISION_API_KEY", raising=False)
     monkeypatch.delenv("OWNER_TOKEN", raising=False)
     store.Base.metadata.drop_all(store.engine)
     store.Base.metadata.create_all(store.engine)
@@ -278,3 +279,89 @@ def test_site_change_invalidates_photo_but_preserves_history():
         ).status_code
         == 422
     )
+
+
+def test_live_revision_patch_preserves_unrelated_fields(monkeypatch):
+    from types import SimpleNamespace
+    from backend import intelligence
+
+    monkeypatch.setenv("NEBIUS_API_KEY", "test-only-not-a-key")
+    monkeypatch.setattr(
+        intelligence,
+        "predict",
+        lambda *a, **k: (
+            SimpleNamespace(
+                supported=True,
+                require_delivery_photo=True,
+                evidence_prompt="Photograph the delivery label.",
+            ),
+            {},
+        ),
+    )
+    base = FormSpec(sites=["Custom site"], note_prompt="Our custom report question")
+    revised, _ = intelligence.revise(base, "Please add delivery evidence.")
+    assert revised.require_delivery_photo
+    assert revised.sites == base.sites
+    assert revised.note_prompt == base.note_prompt
+    assert revised.allow_exception
+    assert not base.require_delivery_photo
+
+
+def test_optimization_budget_stops_before_dispatch():
+    from evals.optimize import RequestBudget
+
+    budget = RequestBudget(limit=1)
+    with pytest.raises(RuntimeError):
+        budget.reserve("x" * 50001, None)
+    assert budget.calls == 0
+    budget.reserve("small", None)
+    with pytest.raises(RuntimeError):
+        budget.reserve("another", None)
+    assert budget.calls == 1
+
+
+def test_retake_cannot_submit_without_exception(monkeypatch):
+    import io
+    from PIL import Image
+    from backend import intelligence
+
+    form, _ = published()
+    proposal = client.post(
+        f"/api/forms/{form['id']}/proposals",
+        json={"feedback": "Ask for a photo of wrong deliveries."},
+    ).json()
+    client.post(f"/api/proposals/{proposal['id']}/evaluate")
+    assert (
+        client.post(
+            f"/api/proposals/{proposal['id']}/publish",
+            json={"artifact_hash": proposal["hash"]},
+        ).status_code
+        == 200
+    )
+    session = start(form)
+    fill(session)
+    monkeypatch.setattr(
+        intelligence,
+        "inspect_photo",
+        lambda _: {
+            "visibility": "not_visible",
+            "status": "retake",
+            "provider": "test",
+            "explanation": "No packaging visible.",
+        },
+    )
+    image = io.BytesIO()
+    Image.new("RGB", (120, 120)).save(image, format="PNG")
+    assert (
+        client.post(
+            f"/api/sessions/{session['id']}/photo",
+            data={"site": "Elm House"},
+            files={"file": ("photo.png", image.getvalue(), "image/png")},
+        ).status_code
+        == 200
+    )
+    assert client.post(f"/api/sessions/{session['id']}/submit").status_code == 422
+    fill(session, exception="Packaging was removed before I arrived.")
+    response = client.post(f"/api/sessions/{session['id']}/submit")
+    assert response.status_code == 200
+    assert response.json()["review_required"]

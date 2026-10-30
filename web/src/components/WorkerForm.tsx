@@ -104,6 +104,8 @@ const registry: ComponentRegistry = {
               }
             >
               {r.photo.observation.explanation}
+              {r.photo.observation.status === "retake" &&
+                " Retake the photo, or explain below why you cannot replace it."}
             </Notice>
           </>
         )}
@@ -387,7 +389,9 @@ export function WorkerForm({
     worker.trim() &&
     site &&
     day &&
-    (!required || photo || exception.trim().length >= 5) &&
+    (!required ||
+      (photo && photo.observation.status !== "retake") ||
+      exception.trim().length >= 5) &&
     (["none", "uncertain"].includes(result.issue) || arranged);
   return (
     <div className="worker-page">

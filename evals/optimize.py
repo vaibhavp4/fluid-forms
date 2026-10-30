@@ -11,6 +11,36 @@ from dotenv import load_dotenv
 load_dotenv()
 import dspy
 from backend.intelligence import InterpretUpdate, lm
+from threading import Lock
+
+
+class RequestBudget:
+    """Shared task/reflection request budget, checked before network dispatch."""
+
+    def __init__(self, limit=56):
+        self.limit = limit
+        self.calls = 0
+        self.lock = Lock()
+
+    def reserve(self, prompt, messages):
+        size = (
+            len(json.dumps(messages, ensure_ascii=False))
+            if messages
+            else len(prompt or "")
+        )
+        with self.lock:
+            if self.calls >= self.limit or size > 50000:
+                raise RuntimeError("Experiment request or prompt-size budget exhausted")
+            self.calls += 1
+
+
+def budgeted_model(budget):
+    class BoundedLM(dspy.LM):
+        def forward(self, prompt=None, messages=None, **kwargs):
+            budget.reserve(prompt, messages)
+            return super().forward(prompt=prompt, messages=messages, **kwargs)
+
+    return lm(BoundedLM)
 
 
 def metric(example, prediction, trace=None, pred_name=None, pred_trace=None):
@@ -81,8 +111,9 @@ def main():
         dspy.Example(note=r["note"], issue=r["issue"]).with_inputs("note")
         for r in data[split]
     ]
-    task = lm()
-    reflection = lm()
+    budget = RequestBudget()
+    task = budgeted_model(budget)
+    reflection = budgeted_model(budget)
     baseline = dspy.Predict(InterpretUpdate)
     output = Path(".data/experiments")
     output.mkdir(parents=True, exist_ok=True)
@@ -110,6 +141,10 @@ def main():
         "test_count": len(data["test"]),
         "model": os.getenv("NEBIUS_MODEL", "nvidia/Nemotron-3_5-Lightning"),
         "algorithm": "GEPA",
+        "reasoning_mode": "disabled",
+        "selection_note": "GEPA selected the original baseline; no improved prompt was selected."
+        if candidate.signature.instructions == baseline.signature.instructions
+        else "GEPA selected a revised prompt using development examples only.",
         "max_metric_calls": args.max_metric_calls,
         "baseline": before,
         "candidate": after,
@@ -118,6 +153,18 @@ def main():
         else "Retain baseline: no held-out improvement",
         "runtime_promotion": False,
         "usage": {
+            "dispatched_requests": budget.calls,
+            "request_limit": budget.limit,
+            "max_prompt_characters": 50000,
+            "max_output_tokens_per_request": 2500,
+            "prompt_tokens": sum(
+                (h.get("usage") or {}).get("prompt_tokens", 0)
+                for h in task.history + reflection.history
+            ),
+            "completion_tokens": sum(
+                (h.get("usage") or {}).get("completion_tokens", 0)
+                for h in task.history + reflection.history
+            ),
             "task_calls": len(task.history),
             "reflection_calls": len(reflection.history),
             "reported_cost_usd": sum(

@@ -21,34 +21,42 @@ class InterpretUpdate(dspy.Signature):
 
 
 class ComposeForm(dspy.Signature):
-    """Configure a daily construction site update from the owner's brief. Preserve the typed workflow contract. Default to no mandatory photo unless requested. Use concise worker-facing language. Do not promise safety certification."""
+    """Edit the supplied template VALUES to match the owner's brief. Return a concrete form instance, never a JSON schema or field definitions. Preserve template sites unless the owner names replacements. Default to no mandatory photo unless requested. Use concise worker-facing language. The blocker_question must ask whether help/replacements have been arranged, answerable yes/no/unknown. Do not promise safety certification."""
 
     brief: str = dspy.InputField()
-    specification: FormSpec = dspy.OutputField()
+    template: str = dspy.InputField(desc="Existing form values to customize")
+    specification: FormSpec = dspy.OutputField(
+        desc="Concrete field values; no schema keywords such as properties or type"
+    )
 
 
 class ReviseForm(dspy.Signature):
-    """Apply owner feedback to the current form within its supported contract. Preserve unrelated wording and sites. The supported improvement is evidence collection for wrong-material deliveries with an exception path. Never remove the exception route or weaken evidence requirements unless explicitly requested."""
+    """Translate owner feedback into an evidence-policy patch. If they ask for photos of wrong-material deliveries, set require_delivery_photo to TRUE. If they explicitly remove that requirement, set it FALSE. Use a concise worker-facing evidence_prompt requesting packaging or delivery labels. Do not mistake the current false value for the desired new value. Mark supported false for changes beyond this wrong-material evidence policy. The application preserves all unrelated fields and the exception path."""
 
     current_spec: str = dspy.InputField()
     feedback: str = dspy.InputField()
-    specification: FormSpec = dspy.OutputField()
+    supported: bool = dspy.OutputField()
+    require_delivery_photo: bool = dspy.OutputField(
+        desc="Desired NEW evidence requirement after applying feedback"
+    )
+    evidence_prompt: str = dspy.OutputField(desc="Worker-facing photo capture guidance")
 
 
 def live():
     return bool(os.getenv("NEBIUS_API_KEY"))
 
 
-def lm():
-    return dspy.LM(
+def lm(model_class=dspy.LM):
+    return model_class(
         "openai/" + os.getenv("NEBIUS_MODEL", "nvidia/Nemotron-3_5-Lightning"),
         api_key=os.environ["NEBIUS_API_KEY"],
         api_base=os.getenv("NEBIUS_BASE_URL", "https://api.tokenfactory.nebius.com/v1"),
         temperature=0.2,
         max_tokens=2500,
         timeout=45,
-        num_retries=1,
+        num_retries=0,
         cache=False,
+        extra_body={"chat_template_kwargs": {"enable_thinking": False}},
     )
 
 
@@ -138,7 +146,9 @@ def interpret(note):
 
 def compose(brief, title):
     if live():
-        result, trace = predict(ComposeForm, brief=brief)
+        result, trace = predict(
+            ComposeForm, brief=brief, template=FormSpec().model_dump_json()
+        )
         spec = FormSpec.model_validate(result.specification)
     else:
         spec = FormSpec(
@@ -154,7 +164,17 @@ def revise(spec, feedback):
         result, trace = predict(
             ReviseForm, current_spec=spec.model_dump_json(), feedback=feedback
         )
-        return FormSpec.model_validate(result.specification), trace
+        if not result.supported:
+            raise ProviderError(
+                "This prototype supports changes to wrong-delivery photo evidence. Please describe that evidence requirement."
+            )
+        return FormSpec.model_validate(
+            {
+                **spec.model_dump(),
+                "require_delivery_photo": result.require_delivery_photo,
+                "evidence_prompt": result.evidence_prompt,
+            }
+        ), trace
     lower = feedback.lower()
     if not any(x in lower for x in ["photo", "picture", "image", "evidence"]):
         raise ProviderError(
@@ -176,6 +196,7 @@ def inspect_photo(data_url):
             "provider": "unconfigured",
             "status": "review",
         }
+    start = time.monotonic()
     try:
         with httpx.Client(timeout=45) as client:
             response = client.post(
@@ -190,7 +211,7 @@ def inspect_photo(data_url):
                 json={
                     "model": model,
                     "temperature": 0,
-                    "max_tokens": 400,
+                    "max_tokens": 2500,
                     "messages": [
                         {
                             "role": "system",
@@ -218,6 +239,8 @@ def inspect_photo(data_url):
         return {
             **observation.model_dump(),
             "provider": model,
+            "usage": response.json().get("usage", {}),
+            "latency_ms": round((time.monotonic() - start) * 1000),
             "status": "retake" if observation.visibility == "not_visible" else "review",
         }
     except Exception:

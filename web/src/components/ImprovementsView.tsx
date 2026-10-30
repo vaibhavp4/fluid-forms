@@ -71,6 +71,7 @@ export function ImprovementsView({
               </div>
             </div>
             <p className="helper">
+              {experiment.selection_note} {" "}
               {experiment.decision}. This is an offline experiment, not an
               automatic production model change.
             </p>
