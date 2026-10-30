@@ -1,8 +1,12 @@
-# Fieldnote review and submission guide
+# Fluid Forms review and submission guide
 
 Verified 30 October 2026. Repository: https://github.com/vaibhavp4/fluid-forms
 
-## Try the complete journey
+## Current primary demo
+
+The expanded product offers [15 starter contracts](TEMPLATES.md), immediate capability graphs, contextual negative-feedback questions, owner-approved additional questions, and dashboard activity traces. The recommended recording uses **End-of-course feedback**. The recording script and private testing handoff are local files excluded from Git. The construction walkthrough below remains an alternate evidence/photo demonstration.
+
+## Try the construction journey
 
 Run the app using the root README. The current local review server is http://127.0.0.1:8000.
 

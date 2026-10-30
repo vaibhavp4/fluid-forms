@@ -57,7 +57,7 @@ export function FormsView({
                 </div>
                 {release && (
                   <button className="primary" onClick={() => openWorker(f.id)}>
-                    Open worker form
+                    Open respondent form
                     <ArrowUpRight size={18} />
                   </button>
                 )}

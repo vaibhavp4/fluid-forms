@@ -365,3 +365,122 @@ def test_retake_cannot_submit_without_exception(monkeypatch):
     response = client.post(f"/api/sessions/{session['id']}/submit")
     assert response.status_code == 200
     assert response.json()["review_required"]
+
+
+def test_all_fifteen_templates_compile_and_publish():
+    templates = client.get("/api/templates").json()
+    assert len(templates) == 15
+    assert len({t["id"] for t in templates}) == 15
+    for template in templates:
+        created = client.post(
+            "/api/forms",
+            json={
+                "template_id": template["id"],
+                "title": template["name"],
+                "brief": template["brief"],
+            },
+        )
+        assert created.status_code == 200, created.text
+        p = created.json()["proposal"]
+        report = client.post(f"/api/proposals/{p['id']}/evaluate")
+        assert report.json()["passed"], report.text
+        published = client.post(
+            f"/api/proposals/{p['id']}/publish", json={"artifact_hash": p["hash"]}
+        )
+        assert published.status_code == 200, published.text
+        assert published.json()["spec"]["template_id"] == template["id"]
+    assert (
+        client.post(
+            "/api/forms",
+            json={"template_id": "invented", "brief": "This must not call any models."},
+        ).status_code
+        == 422
+    )
+
+
+def test_negative_feedback_routes_and_improves_next_version():
+    from backend.contracts import active_questions, Interpretation
+
+    p = client.post(
+        "/api/forms",
+        json={
+            "template_id": "course-feedback",
+            "title": "Course feedback",
+            "brief": "Collect the course experience and adapt questions to negative feedback.",
+        },
+    ).json()["proposal"]
+    client.post(f"/api/proposals/{p['id']}/evaluate")
+    client.post(f"/api/proposals/{p['id']}/publish", json={"artifact_hash": p["hash"]})
+    form = {"id": p["form_id"]}
+    old = start(form)
+
+    def answer(session, followups):
+        note = "The instructor was helpful but the assignments were confusing and too fast."
+        interpretation = client.post(
+            f"/api/sessions/{session['id']}/interpret", json={"note": note}
+        ).json()["interpretation"]
+        assert interpretation["issue"] == "negative_feedback"
+        return client.put(
+            f"/api/sessions/{session['id']}",
+            json={
+                "site": "AI Foundations",
+                "day": "2026-10-30",
+                "worker": "Learner",
+                "note": note,
+                "interpretation": interpretation,
+                "arranged": "no",
+                "followups": followups,
+            },
+        )
+
+    assert answer(old, {}).status_code == 200
+    assert client.post(f"/api/sessions/{old['id']}/submit").status_code == 422
+    assert (
+        answer(old, {"context-detail": "The practical assignments."}).status_code == 200
+    )
+    assert client.post(f"/api/sessions/{old['id']}/submit").status_code == 200
+    revision = client.post(
+        f"/api/forms/{form['id']}/proposals",
+        json={
+            "feedback": "After negative feedback also ask what specific example would have helped."
+        },
+    ).json()
+    assert len(revision["spec"]["follow_up_rules"]) == 2
+    assert client.post(f"/api/proposals/{revision['id']}/evaluate").json()["passed"]
+    assert (
+        client.post(
+            f"/api/proposals/{revision['id']}/publish",
+            json={"artifact_hash": revision["hash"]},
+        ).status_code
+        == 200
+    )
+    assert (
+        len(client.get(f"/api/sessions/{old['id']}").json()["spec"]["follow_up_rules"])
+        == 1
+    )
+    new = start(form)
+    assert new["version"] == 2
+    assert answer(new, {"context-detail": "Assignments."}).status_code == 200
+    assert client.post(f"/api/sessions/{new['id']}/submit").status_code == 422
+    assert (
+        answer(
+            new,
+            {
+                "context-detail": "Assignments.",
+                "followup-2": "A worked example with a small dataset.",
+            },
+        ).status_code
+        == 200
+    )
+    submitted = client.post(f"/api/sessions/{new['id']}/submit").json()
+    assert submitted["answers"]["followups"]["followup-2"].startswith(
+        "A worked example"
+    )
+    positive = Interpretation(
+        completed="Useful course",
+        blocker="",
+        next_action="",
+        issue="none",
+        summary="Helpful",
+    )
+    assert active_questions(FormSpec.model_validate(new["spec"]), positive) == []

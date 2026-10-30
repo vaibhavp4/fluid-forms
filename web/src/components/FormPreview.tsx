@@ -43,8 +43,8 @@ export function compilePreview(form: FormSpec): Spec {
   const steps = [
     {
       kind: "site",
-      label: "Choose your site",
-      detail: "Job, date, and your name. Fixed validation.",
+      label: "Choose your " + (form.context_label || "site").toLowerCase(),
+      detail: "Context, date, and your name. Fixed validation.",
     },
     { kind: "note", label: "Tell us how today went", detail: form.note_prompt },
     {
@@ -52,6 +52,11 @@ export function compilePreview(form: FormSpec): Spec {
       label: "Clarify what needs attention",
       detail: form.blocker_question,
     },
+    ...(form.follow_up_rules || []).map((r) => ({
+      kind: "branch",
+      label: "If " + r.trigger.replaceAll("_", " "),
+      detail: r.question,
+    })),
     ...(form.require_delivery_photo
       ? [
           {

@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Literal
+from typing import Literal, Annotated
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -7,7 +7,31 @@ class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+Issue = Literal[
+    "wrong_material",
+    "late_delivery",
+    "weather",
+    "other",
+    "none",
+    "uncertain",
+    "negative_feedback",
+    "request",
+]
+
+
+class FollowUpRule(StrictModel):
+    id: str = Field(pattern=r"^[a-z0-9-]{1,40}$")
+    trigger: Issue
+    question: str = Field(min_length=5, max_length=400)
+
+
 class FormSpec(StrictModel):
+    template_id: str = "daily-site"
+    context_label: str = "Site"
+    completed_label: str = "Work completed"
+    blocker_label: str = "What held things up?"
+    next_action_label: str = "What do you need next?"
+    follow_up_rules: list[FollowUpRule] = Field(default_factory=list, max_length=5)
     title: str = Field(default="Daily site update", min_length=3, max_length=80)
     description: str = Field(
         default="A quick update before you leave the site.", max_length=300
@@ -36,9 +60,7 @@ class Interpretation(StrictModel):
     completed: str = Field(max_length=1000)
     blocker: str = Field(max_length=1000)
     next_action: str = Field(max_length=1000)
-    issue: Literal[
-        "wrong_material", "late_delivery", "weather", "other", "none", "uncertain"
-    ]
+    issue: Issue
     summary: str = Field(max_length=1000)
 
 
@@ -48,6 +70,7 @@ class PhotoObservation(StrictModel):
 
 
 class CreateForm(StrictModel):
+    template_id: str = "daily-site"
     brief: str = Field(min_length=10, max_length=4000)
     title: str = Field(default="Daily site update", min_length=3, max_length=80)
 
@@ -65,6 +88,9 @@ class NoteRequest(StrictModel):
 
 
 class SaveSession(StrictModel):
+    followups: dict[str, Annotated[str, Field(max_length=1000)]] = Field(
+        default_factory=dict, max_length=5
+    )
     site: str
     day: date
     worker: str = Field(min_length=1, max_length=100)
@@ -80,6 +106,10 @@ class Approval(StrictModel):
 
 def photo_required(spec: FormSpec, interpretation: Interpretation) -> bool:
     return spec.require_delivery_photo and interpretation.issue == "wrong_material"
+
+
+def active_questions(spec: FormSpec, interpretation: Interpretation):
+    return [r for r in spec.follow_up_rules if r.trigger == interpretation.issue]
 
 
 class ReviewDecision(StrictModel):

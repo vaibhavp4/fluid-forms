@@ -7,6 +7,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import type { Workspace, Submission, Form } from "../types";
+import { ActivitySummary } from "./ActivitySummary";
 import { ResponseDetail } from "./ResponseDetail";
 import { Status } from "./ui";
 export function UpdatesView({
@@ -65,6 +66,7 @@ export function UpdatesView({
           </span>
         </div>
       </section>
+      <ActivitySummary data={data} />
       <div
         className={response ? "response-layout" : "response-layout no-detail"}
       >
@@ -80,7 +82,7 @@ export function UpdatesView({
               <table>
                 <thead>
                   <tr>
-                    <th>Site</th>
+                    <th>Context</th>
                     <th>Update</th>
                     <th>Status</th>
                     <th>Received</th>
@@ -153,7 +155,7 @@ export function UpdatesView({
               <MessageSquareText size={36} />
               <h3>Your next useful update starts here.</h3>
               <p>
-                Create a daily site form, or explore the full loop with prepared
+                Create a contextual form, or explore the full loop with prepared
                 examples.
               </p>
               <button className="secondary" onClick={seed} disabled={busy}>
@@ -189,7 +191,7 @@ export function UpdatesView({
           </div>
           <button className="text-button" onClick={() => openWorker(f.id)}>
             <ExternalLink size={16} />
-            Open worker form
+            Open respondent form
           </button>
         </div>
       ))}

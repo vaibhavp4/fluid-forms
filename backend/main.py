@@ -27,6 +27,7 @@ from . import store
 from .contracts import *
 from . import intelligence as ai
 from .evaluation import artifact_hash, evaluate_spec
+from .templates import TEMPLATES
 
 app = FastAPI(title="Fieldnote", version="0.1.0")
 store.Base.metadata.create_all(store.engine)
@@ -96,9 +97,16 @@ def workspace():
         }
 
 
+@app.get("/api/templates", dependencies=[Depends(owner)])
+def templates():
+    return TEMPLATES
+
+
 @app.post("/api/forms", dependencies=[Depends(owner)])
 def create_form(body: CreateForm):
-    spec, trace = provider_call(ai.compose, body.brief, body.title)
+    if body.template_id not in [t["id"] for t in TEMPLATES]:
+        raise HTTPException(422, "Choose a supported template")
+    spec, trace = provider_call(ai.compose, body.brief, body.title, body.template_id)
     with store.Session.begin() as db:
         form = store.create(
             db,
@@ -283,8 +291,15 @@ def get_session(session_id: str):
 @app.post("/api/sessions/{session_id}/interpret")
 def interpret(session_id: str, body: NoteRequest):
     with store.Session() as db:
-        mutable(get(db, session_id, "session"))
-    interpretation, trace = provider_call(ai.interpret, body.note)
+        current = get(db, session_id, "session")
+        mutable(current)
+        spec = FormSpec.model_validate(current.data["spec"])
+    interpretation, trace = provider_call(ai.interpret, body.note, spec)
+    trace["operation"] = "interpret_response"
+    trace["route"] = interpretation.issue
+    trace["active_questions"] = [
+        r.question for r in active_questions(spec, interpretation)
+    ]
     with store.Session.begin() as db:
         session = get(db, session_id, "session")
         mutable(session)
@@ -407,6 +422,12 @@ def submit(session_id: str):
         if not answers:
             raise HTTPException(422, "Review and save your answers first")
         data = SaveSession.model_validate(answers)
+        spec = FormSpec.model_validate(session.data["spec"])
+        for rule in active_questions(spec, data.interpretation):
+            if len(data.followups.get(rule.id, "").strip()) < 3:
+                raise HTTPException(
+                    422, f"Answer the contextual question: {rule.question}"
+                )
         needed = photo_required(
             FormSpec.model_validate(session.data["spec"]), data.interpretation
         )
@@ -447,6 +468,7 @@ def submit(session_id: str):
                 "review_required": review,
                 "sample": False,
                 "trace": session.data.get("last_interpretation", {}).get("trace", {}),
+                "spec": session.data["spec"],
             },
             id="sub-" + session.id,
         )

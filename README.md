@@ -1,6 +1,6 @@
-# Fieldnote
+# Fluid Forms
 
-Adaptive site updates for small contractors. Create a workflow, collect a worker’s report, see what’s missing, and publish an evaluated improvement for the next visit.
+Contextual forms that turn unstructured responses into structured data and improve through owner feedback. Start from a template, preview the capability graph, collect relevant follow-ups, and publish a checked improvement for the next respondent.
 
 Built for the [Nebius × NVIDIA Global AI Hackathon](https://nebiusglobalaihackathon.devpost.com/).
 
@@ -12,9 +12,13 @@ Built for the [Nebius × NVIDIA Global AI Hackathon](https://nebiusglobalaihacka
 
 ## What works
 
+- Fifteen functional starter templates across education, retail, bookings, research, operations and community.
+- Immediate capability graph: natural input → model interpretation → deterministic routing → contextual questions → structured record.
 - Template-based creation, preview, checks, and explicit publication.
 - Voice/text updates, editable interpretation, conditional questions, and photo evidence.
-- Response summaries with original notes, evidence exceptions, and office review.
+- Response summaries with original notes, contextual answers, evidence exceptions, and office review.
+- Negative/mixed-feedback routing and owner-requested follow-up questions in new versions.
+- Dashboard improvement activity with model calls, routing decisions, checks and publication history.
 - Feedback-driven revisions, immutable versions, pinned sessions, and rollback.
 - Separate contract regression checks and a runnable offline DSPy/GEPA experiment.
 
@@ -55,7 +59,7 @@ npm --prefix web run build
 .venv/bin/python -m evals.optimize --max-metric-calls 18 --max-seconds 600
 ```
 
-The experiment compares baseline and GEPA-selected program on separate synthetic held-out examples. Its report appears under **Improvements**; a recorded report is included for review without spending credits. Final smoke result: 8/8 for both, with the baseline retained. This is not a production reliability or optimization-gain claim. A failed or unimproved candidate does not replace the runtime program. Each experiment has a 56-request hard cap; it is optional for trying the product.
+The experiment compares baseline and GEPA-selected program on separate synthetic held-out examples. Its report appears under **Improvements**; a recorded report is included for review without spending credits. Final smoke result: 8/8 for both, with the baseline retained. This is not a production reliability or optimization-gain claim. A failed or unimproved candidate does not replace the runtime program. This recorded experiment covers site-report interpretation, not the new course-feedback signature. Each experiment has a 56-request hard cap; it is optional for trying the product.
 
 ## Architecture and limits
 
@@ -67,10 +71,12 @@ This is a single-workspace prototype. Set `OWNER_TOKEN` before external exposure
 
 ## Project notes
 
+- [Starter templates and current capability scope](docs/TEMPLATES.md)
+
 - [Demo journey](docs/DEMO_USER_JOURNEY.md)
 - [Current build decisions](docs/BUILD_DECISIONS.md)
 - [Technical decisions and evaluation plan](docs/TECHNICAL_DECISIONS.md)
 - [Full product vision](docs/PRD.md)
 - [Hackathon rules and resources](docs/HACKATHON_OVERVIEW.md)
 
-Verified: 11 backend tests, production build, desktop/mobile HTTPS browser journey, live NVIDIA text/vision calls, and database/photo persistence after a service restart. Submission video URL is pending.
+Verified: 13 backend tests, production build, desktop/mobile HTTPS browser journey, live NVIDIA text/vision calls, and database/photo persistence after a service restart. Submission video URL is pending.

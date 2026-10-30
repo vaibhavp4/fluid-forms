@@ -1,18 +1,18 @@
 # Application architecture — C4 views
 
-These three views describe the working Fieldnote application deployed at [fluid-forms.exe.xyz](https://fluid-forms.exe.xyz/). They follow the [C4 model's](https://c4model.com/diagrams) context → container → component levels, using Mermaid flowcharts that render directly on GitHub. A **container** here means an application or data store, not necessarily a Docker container.
+These three views describe the working Fluid Forms application deployed at [fluid-forms.exe.xyz](https://fluid-forms.exe.xyz/). They follow the [C4 model's](https://c4model.com/diagrams) context → container → component levels, using Mermaid flowcharts that render directly on GitHub. A **container** here means an application or data store, not necessarily a Docker container.
 
-Blue nodes are Fieldnote software, grey nodes are external systems, green nodes are people, and amber nodes are persistent data. Dashed arrows show optional offline evaluation and its recorded artifacts; solid arrows show the live application path.
+Blue nodes are Fluid Forms software, grey nodes are external systems, green nodes are people, and amber nodes are persistent data. Dashed arrows show optional offline evaluation and its recorded artifacts; solid arrows show the live application path.
 
 ## Level 1 — System context
 
-**Who uses Fieldnote, and which external service powers its intelligence?**
+**Who uses Fluid Forms, and which external service powers its intelligence?**
 
 ```mermaid
 flowchart LR
     owner["Business owner / office reviewer<br/>[Person]<br/>Configures workflows<br/>Approves changes"]
-    worker["Site worker<br/>[Person]<br/>Reports work<br/>Confirms details and evidence"]
-    fieldnote["Fieldnote<br/>[Software system]<br/>Adaptive site updates<br/>Owner-approved revisions"]
+    worker["Respondent<br/>[Person]<br/>Shares experience<br/>Confirms details and evidence"]
+    fieldnote["Fluid Forms<br/>[Software system]<br/>Contextual forms<br/>Owner-approved revisions"]
     nebius["Nebius Token Factory<br/>[External software system]<br/>NVIDIA text and vision inference"]
 
     owner -->|"Configure, publish and review via web app"| fieldnote
@@ -27,7 +27,7 @@ flowchart LR
     class nebius external
 ```
 
-The owner and worker use the same web application with different views. Owner API operations require an access token. Worker form/session links carry access to their workflow or session. This deployment is a shared workspace.
+The owner and respondent use the same web application with different views. Owner API operations require an access token. Worker form/session links carry access to their workflow or session. This deployment is a shared workspace.
 
 ## Level 2 — Containers and deployment boundary
 
@@ -39,7 +39,7 @@ flowchart TB
     proxy["exe.dev HTTPS proxy<br/>[External infrastructure]<br/>TLS termination and public URL"]
 
     subgraph vm["Deployment boundary: dedicated exe.dev VM — 2 vCPU / 4 GiB"]
-        api["Fieldnote server<br/>[Container: FastAPI]<br/>REST API and React assets<br/>systemd-managed Python"]
+        api["Fluid Forms server<br/>[Container: FastAPI]<br/>REST API and React assets<br/>systemd-managed Python"]
         db[("Workflow database<br/>[Data store: SQLite]<br/>Forms and releases<br/>Sessions and responses<br/>Proposals and audits")]
         media[("Evidence files<br/>[Data store: VM disk]<br/>Normalized JPEGs")]
         reports["Recorded evaluation artifacts<br/>[Data store: JSON files]<br/>Bundled experiment report"]
@@ -90,7 +90,7 @@ All components inside the boundary below run in the **same FastAPI application**
 flowchart TB
     ui["Browser web application<br/>[External container]"]
 
-    subgraph server["Container boundary: Fieldnote Python server"]
+    subgraph server["Container boundary: Fluid Forms Python server"]
         routes["API routes and access control<br/>[Component: main.py]<br/>Owner access<br/>Session orchestration"]
         contracts["Typed workflow contract<br/>[Component: contracts.py]<br/>Values and validation<br/>Branch predicate"]
         inference["Intelligence adapters<br/>[Component: intelligence.py]<br/>DSPy text / httpx vision<br/>Provider error handling"]
@@ -128,10 +128,15 @@ flowchart TB
     style server fill:#f7fafc,stroke:#90a4b8
 ```
 
+### Templates and contextual question assembly
+
+The owner can choose from [15 starter templates](TEMPLATES.md). `backend/templates.py` supplies typed contracts. The authoring UI immediately renders `PipelineGraph` from that contract. `InterpretFormUpdate` uses workflow context to classify unstructured feedback; deterministic rules select matching required questions. `ReviseQuestions` proposes one additional question, and the existing hash/check/approval release gate publishes the extended specification. The dashboard derives an activity trace from stored proposals, responses and releases. The GEPA harness remains offline and its recorded test covers the original site-report signature.
+
 ### Source map
 
 | Responsibility | Implementation |
 | --- | --- |
+| Starter catalog and graph | [backend/templates.py](../backend/templates.py), [PipelineGraph.tsx](../web/src/components/PipelineGraph.tsx) |
 | Owner navigation, responses and proposals | [App.tsx](../web/src/App.tsx) and [owner components](../web/src/components/) |
 | Typed specification → preview / conditional form | [FormPreview.tsx](../web/src/components/FormPreview.tsx), [WorkerForm.tsx](../web/src/components/WorkerForm.tsx) |
 | API orchestration, access control, publication, evidence and review | [backend/main.py](../backend/main.py) |

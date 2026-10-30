@@ -8,10 +8,31 @@ export type Interpretation = {
     | "weather"
     | "other"
     | "none"
-    | "uncertain";
+    | "uncertain"
+    | "negative_feedback"
+    | "request";
   summary: string;
 };
+export type FollowUpRule = {
+  id: string;
+  trigger: Interpretation["issue"];
+  question: string;
+};
+export type Template = {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  brief: string;
+  spec: FormSpec;
+};
 export type FormSpec = {
+  template_id?: string;
+  context_label?: string;
+  completed_label?: string;
+  blocker_label?: string;
+  next_action_label?: string;
+  follow_up_rules?: FollowUpRule[];
   title: string;
   description: string;
   note_prompt: string;
@@ -46,6 +67,7 @@ export type Release = {
   evaluation: Evaluation;
 };
 export type Proposal = {
+  created: string;
   id: string;
   form_id: string;
   base_release: string | null;
@@ -67,6 +89,7 @@ export type Photo = {
   };
 };
 export type Answers = {
+  followups?: Record<string, string>;
   site: string;
   day: string;
   worker: string;
@@ -76,6 +99,7 @@ export type Answers = {
   exception: string;
 };
 export type Submission = {
+  spec?: FormSpec;
   id: string;
   form_id: string;
   release_id: string;

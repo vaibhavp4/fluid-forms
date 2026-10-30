@@ -24,3 +24,10 @@ The authenticated Nebius catalog and live calls verified `nvidia/Nemotron-3_5-Li
 The final live visual check also motivated explicit completed-work extraction rules: planned/needed work is not completed. Workers still confirm interpretations. Vision remains advisory; a retake blocks required-evidence submission until replaced or explained. Site changes invalidate attached evidence.
 
 GEPA results, measured token usage, failed-candidate behavior, UI acceptance, and unresolved limits are recorded in [the review guide](REVIEW_GUIDE.md). The repository's existing MIT license was retained. Docker deployment files are prepared but unverified because the local Docker daemon was unavailable. The live application runs directly under systemd on a dedicated exe.dev VM; database and photo persistence across restart were verified. See the [three C4 architecture views](ARCHITECTURE.md) for the deployed boundaries and component responsibilities.
+
+
+## Broader demo scope, 30 October
+
+The product is now named Fluid Forms. The original construction loop remains supported, alongside 14 additional typed starter templates. The primary recording journey uses end-of-course feedback to demonstrate the tension between free-form answers and structured collection: negative/mixed feedback activates a topic question; owner feedback adds another required question in a checked new version; positive responses avoid that route. The creation view and proposal view expose the assembled capability graph. The overview exposes actual interpretation/proposal/check/publication events. See [template scope](TEMPLATES.md).
+
+The live runtime still uses hosted NVIDIA inference. Edge models and continuous optimization of model weights/model selection remain vision, rather than implemented claims. The existing GEPA report is labeled as a recorded site-report experiment and does not establish course-feedback accuracy.

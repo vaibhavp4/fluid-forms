@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { api, errorMessage } from "../api";
 import type { Proposal, Release, Evaluation, FormSpec } from "../types";
+import { PipelineGraph } from "./PipelineGraph";
 import { FormPreview } from "./FormPreview";
 import { Busy, Notice } from "./ui";
 export function ProposalView({
@@ -93,6 +94,7 @@ export function ProposalView({
             <h2>{proposal.spec.title}</h2>
           </div>
           <p className="muted">{proposal.spec.description}</p>
+          <PipelineGraph spec={proposal.spec} />
           <FormPreview spec={proposal.spec} />
           <div className="notice info">
             <ShieldCheck size={19} />
@@ -130,7 +132,8 @@ export function ProposalView({
                             blocker_question: "Follow-up question",
                             title: "Form name",
                             description: "Introduction",
-                            sites: "Site choices",
+                            sites: "Context choices",
+                            follow_up_rules: "Contextual question assembly",
                           } as Record<string, string>
                         )[key] || key}
                       </strong>
@@ -139,7 +142,20 @@ export function ProposalView({
                           ? proposal.spec.require_delivery_photo
                             ? "Add a photo step for confirmed wrong-material deliveries. Other updates remain unchanged."
                             : "Remove the mandatory delivery photo step."
-                          : String(proposal.spec[key as keyof FormSpec])}
+                          : key === "follow_up_rules"
+                            ? (proposal.spec.follow_up_rules || [])
+                                .filter(
+                                  (r) =>
+                                    !(baseline.follow_up_rules || []).some(
+                                      (b) => b.id === r.id,
+                                    ),
+                                )
+                                .map(
+                                  (r) =>
+                                    `If ${r.trigger.replaceAll("_", " ")}: ${r.question}`,
+                                )
+                                .join(" · ")
+                            : String(proposal.spec[key as keyof FormSpec])}
                       </p>
                     </div>
                   ))
@@ -176,7 +192,7 @@ export function ProposalView({
               </>
             ) : (
               <p className="muted">
-                Check required fields, the delivery branch, exception handling,
+                Check required fields, contextual branches, exception handling,
                 and unchanged paths.
               </p>
             )}

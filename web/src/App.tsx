@@ -146,6 +146,13 @@ export default function App() {
     (s) => s.answers.interpretation.issue !== "none" || s.review_required,
   ).length;
   function improveForm(formId: string) {
+    const form = data.form.find((f) => f.id === formId);
+    const spec = data.release.find((r) => r.id === form?.current_release)?.spec;
+    setFeedback(
+      spec?.template_id && spec.template_id !== "daily-site"
+        ? "When someone gives negative or mixed feedback, also ask what specific example or change would have made the experience better."
+        : "When someone reports the wrong materials arriving, ask for a photo of the packaging or delivery label before they leave. If they can’t get it, let them explain why.",
+    );
     setImprove(data.form.find((f) => f.id === formId) || null);
     setError("");
   }
@@ -201,7 +208,7 @@ export default function App() {
     <div className="app-shell">
       <aside className="sidebar">
         <a className="brand" href="/">
-          Fieldnote
+          Fluid Forms
           <span className="brand-dot" />
         </a>
         <nav aria-label="Workspace navigation">
@@ -292,7 +299,7 @@ export default function App() {
               <div>
                 <h1>
                   {page === "Overview"
-                    ? "Site updates"
+                    ? "Forms that learn from every response"
                     : page === "Forms"
                       ? "Your workflows"
                       : page === "Responses"
@@ -301,7 +308,7 @@ export default function App() {
                 </h1>
                 <p>
                   {page === "Overview"
-                    ? "A clearer picture of every day on site."
+                    ? "Unstructured input. Relevant questions. Better structured data."
                     : page === "Forms"
                       ? "Simple for your team. Adaptable for your business."
                       : page === "Responses"

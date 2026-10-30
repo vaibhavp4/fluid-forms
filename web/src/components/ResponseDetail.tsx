@@ -64,8 +64,10 @@ export function ResponseDetail({
       />
       <h2>
         {a.interpretation.issue === "none"
-          ? "A day of progress"
-          : "A blocker worth following up"}
+          ? "An experience worth understanding"
+          : a.interpretation.issue === "negative_feedback"
+            ? "Feedback worth following up"
+            : "A blocker worth following up"}
       </h2>
       <blockquote>“{a.note}”</blockquote>
       <p className="source">
@@ -78,9 +80,9 @@ export function ResponseDetail({
       <details className="response-details">
         <summary>View confirmed details</summary>
         <dl className="response-facts">
-          <dt>Completed</dt>
+          <dt>{submission.spec?.completed_label || "Completed"}</dt>
           <dd>{a.interpretation.completed || "Not specified"}</dd>
-          <dt>Needed next</dt>
+          <dt>{submission.spec?.next_action_label || "Needed next"}</dt>
           <dd>{a.interpretation.next_action || "Not specified"}</dd>
           {a.arranged && (
             <>
@@ -95,6 +97,29 @@ export function ResponseDetail({
             </>
           )}
         </dl>
+      </details>
+      {Object.entries(a.followups || {}).length > 0 && (
+        <section className="followup-facts">
+          <h3>Contextual answers</h3>
+          {Object.entries(a.followups || {}).map(([id, value]) => (
+            <div key={id}>
+              <strong>
+                {submission.spec?.follow_up_rules?.find((r) => r.id === id)
+                  ?.question || id}
+              </strong>
+              <p>{value}</p>
+            </div>
+          ))}
+        </section>
+      )}
+      <details className="response-details">
+        <summary>View execution trace</summary>
+        <p className="helper">
+          Model: {String(submission.trace.model || "local demo")} · Route:{" "}
+          {a.interpretation.issue.replaceAll("_", " ")} ·{" "}
+          {Object.keys(a.followups || {}).length} contextual answers · Version{" "}
+          {submission.version}
+        </p>
       </details>
       {missing && (
         <Notice tone="warning">

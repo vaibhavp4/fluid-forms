@@ -44,7 +44,9 @@ export function Modal({
   title,
   children,
   onClose,
+  wide = false,
 }: {
+  wide?: boolean;
   title: string;
   children: ReactNode;
   onClose: () => void;
@@ -94,7 +96,7 @@ export function Modal({
     >
       <section
         ref={container}
-        className="modal"
+        className={`modal ${wide ? "wide" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label={title}

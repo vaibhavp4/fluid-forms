@@ -2,7 +2,7 @@
 
 import hashlib
 import json
-from .contracts import FormSpec, Interpretation, photo_required
+from .contracts import FormSpec, Interpretation, photo_required, active_questions
 
 
 def artifact_hash(spec):
@@ -32,6 +32,23 @@ def evaluate_spec(spec, baseline=None):
         expected = spec.require_delivery_photo and issue == "wrong_material"
         check(name, photo_required(spec, result) == expected)
     check("Exception route remains available", spec.allow_exception)
+    check(
+        "Question identifiers are unique",
+        len({r.id for r in spec.follow_up_rules}) == len(spec.follow_up_rules),
+    )
+    check(
+        "Contextual questions use explicit attention triggers",
+        all(r.trigger not in ["none", "uncertain"] for r in spec.follow_up_rules),
+    )
+    for issue in ["negative_feedback", "request", "other", "none", "uncertain"]:
+        observation = Interpretation(
+            completed="", blocker="", next_action="", summary="", issue=issue
+        )
+        check(
+            f"Route {issue} selects only matching questions",
+            [r.id for r in active_questions(spec, observation)]
+            == [r.id for r in spec.follow_up_rules if r.trigger == issue],
+        )
     check("Worker prompt is present", bool(spec.note_prompt.strip()))
     check("Evidence prompt is present", bool(spec.evidence_prompt.strip()))
     check(
@@ -40,6 +57,11 @@ def evaluate_spec(spec, baseline=None):
     )
     if baseline:
         check("Existing sites preserved", spec.sites == baseline.sites)
+        check(
+            "Existing contextual questions preserved",
+            spec.follow_up_rules[: len(baseline.follow_up_rules)]
+            == baseline.follow_up_rules,
+        )
     return {
         "kind": "contract_regression",
         "passed": all(x["passed"] for x in cases),

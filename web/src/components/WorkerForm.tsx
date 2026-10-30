@@ -17,6 +17,7 @@ import {
   Square,
   FileCheck2,
 } from "lucide-react";
+import { activeQuestions, issueLabels, isSite } from "../workflow";
 import { api, errorMessage } from "../api";
 import type {
   WorkerSession,
@@ -27,6 +28,8 @@ import type {
 import { Busy, Notice } from "./ui";
 
 type Runtime = {
+  followups: Record<string, string>;
+  setFollowup: (id: string, value: string) => void;
   arranged: string;
   setArranged: (x: string) => void;
   photo: Photo | null;
@@ -45,14 +48,35 @@ const registry: ComponentRegistry = {
       <label>
         {String(element.props.question)}
         <select
+          aria-label={String(element.props.question)}
           value={r.arranged}
           onChange={(e) => r.setArranged(e.target.value)}
         >
           <option value="">Choose an answer</option>
-          <option value="yes">Yes, it’s arranged</option>
-          <option value="no">No, we need help</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
           <option value="unknown">I’m not sure</option>
         </select>
+      </label>
+    );
+  },
+  ContextQuestion: ({ element }) => {
+    const r = useContext(RuntimeContext)!;
+    const id = String(element.props.id);
+    return (
+      <label>
+        {String(element.props.question)}
+        <textarea
+          rows={3}
+          aria-label={String(element.props.question)}
+          value={r.followups[id] || ""}
+          maxLength={1000}
+          onChange={(e) => r.setFollowup(id, e.target.value)}
+          placeholder="A little more detail helps…"
+        />
+        <span className="helper">
+          Asked because your response matched this form's contextual route.
+        </span>
       </label>
     );
   },
@@ -142,7 +166,14 @@ function compileRuntime(session: WorkerSession, result: Interpretation): Spec {
   }
   const required =
     session.spec.require_delivery_photo && result.issue === "wrong_material";
-  children.push("evidence");
+  for (const rule of activeQuestions(session.spec, result)) {
+    children.push(rule.id);
+    elements[rule.id] = {
+      type: "ContextQuestion",
+      props: { id: rule.id, question: rule.question },
+    };
+  }
+  if (isSite(session.spec)) children.push("evidence");
   elements.evidence = {
     type: "Evidence",
     props: {
@@ -173,6 +204,7 @@ export function WorkerForm({
   const [result, setResult] = useState<Interpretation | null>(null);
   const [arranged, setArranged] = useState("");
   const [exception, setException] = useState("");
+  const [followups, setFollowups] = useState<Record<string, string>>({});
   const [photo, setPhoto] = useState<Photo | null>(null);
   const [receipt, setReceipt] = useState<Submission | null>(null);
   const [recording, setRecording] = useState(false);
@@ -207,6 +239,7 @@ export function WorkerForm({
           setResult(s.answers.interpretation);
           setArranged(s.answers.arranged);
           setException(s.answers.exception);
+          setFollowups(s.answers.followups || {});
         } else {
           const draft = localStorage.getItem("fieldnote-draft-" + s.id);
           if (draft) {
@@ -240,6 +273,7 @@ export function WorkerForm({
   function editNote(value: string) {
     setNote(value);
     setResult(null);
+    setFollowups({});
     setArranged("");
     setException("");
   }
@@ -328,6 +362,12 @@ export function WorkerForm({
         day,
         note,
         interpretation: result,
+        followups: Object.fromEntries(
+          activeQuestions(session.spec, result).map((r) => [
+            r.id,
+            followups[r.id] || " ",
+          ]),
+        ),
         arranged,
         exception,
       });
@@ -348,7 +388,7 @@ export function WorkerForm({
     return (
       <div className="worker-page">
         <div className="worker-brand">
-          Fieldnote<span>Site updates</span>
+          Fluid Forms<span>Contextual conversations</span>
         </div>
         <section className="panel receipt">
           <CheckCircle2 size={52} />
@@ -392,11 +432,14 @@ export function WorkerForm({
     (!required ||
       (photo && photo.observation.status !== "retake") ||
       exception.trim().length >= 5) &&
-    (["none", "uncertain"].includes(result.issue) || arranged);
+    (["none", "uncertain"].includes(result.issue) || arranged) &&
+    activeQuestions(session.spec, result).every(
+      (r) => (followups[r.id] || " ").trim().length >= 3,
+    );
   return (
     <div className="worker-page">
       <div className="worker-brand">
-        Fieldnote<span>Site updates</span>
+        Fluid Forms<span>Contextual conversations</span>
       </div>
       <button className="text-button" onClick={onExit}>
         <ArrowLeft size={16} />
@@ -407,15 +450,29 @@ export function WorkerForm({
           {session.spec.title} · Version {session.version}
         </span>
         <h1>
-          A quick update.
-          <br />A clearer tomorrow.
+          {isSite(session.spec) ? (
+            <>
+              A quick update.
+              <br />A clearer tomorrow.
+            </>
+          ) : (
+            <>
+              Your experience.
+              <br />
+              The details that matter.
+            </>
+          )}
         </h1>
         <p>{session.spec.description}</p>
       </header>
       <section className="panel worker-card">
         <div className="section-heading">
           <span className="number">1</span>
-          <h2>Start with your day</h2>
+          <h2>
+            {isSite(session.spec)
+              ? "Start with your day"
+              : "Tell us about your experience"}
+          </h2>
         </div>
         <div className="two-fields">
           <label>
@@ -428,8 +485,9 @@ export function WorkerForm({
             />
           </label>
           <label>
-            Site
+            {session.spec.context_label || "Site"}
             <select
+              aria-label={session.spec.context_label || "Site"}
               value={site}
               disabled={busy === "photo"}
               onChange={(e) => {
@@ -459,7 +517,11 @@ export function WorkerForm({
             value={note}
             onChange={(e) => editNote(e.target.value)}
             maxLength={6000}
-            placeholder="Finished bathroom prep. Couldn’t start tiling because the wrong tiles arrived…"
+            placeholder={
+              isSite(session.spec)
+                ? "Finished bathroom prep. Couldn’t start tiling because the wrong tiles arrived…"
+                : "Tell us in your own words. We’ll ask for the details that matter."
+            }
           />
         </label>
         <div className="note-actions">
@@ -511,7 +573,7 @@ export function WorkerForm({
             Correct anything we missed. Your original note stays attached.
           </p>
           <label>
-            Work completed
+            {session.spec.completed_label || "Work completed"}
             <textarea
               rows={2}
               value={result.completed}
@@ -521,7 +583,7 @@ export function WorkerForm({
             />
           </label>
           <label>
-            What held things up?
+            {session.spec.blocker_label || "What held things up?"}
             <textarea
               rows={2}
               value={result.blocker}
@@ -533,6 +595,7 @@ export function WorkerForm({
           <label>
             Issue type
             <select
+              aria-label="Issue type"
               value={result.issue}
               onChange={(e) => {
                 setResult({
@@ -542,7 +605,15 @@ export function WorkerForm({
                 setArranged("");
               }}
             >
-              <option value="none">No blocker</option>
+              {!isSite(session.spec) && (
+                <>
+                  <option value="negative_feedback">
+                    Negative or mixed feedback
+                  </option>
+                  <option value="request">Request or enquiry</option>
+                </>
+              )}
+              <option value="none">Positive / no concern</option>
               <option value="wrong_material">Wrong materials delivered</option>
               <option value="late_delivery">Late delivery</option>
               <option value="weather">Weather delay</option>
@@ -551,7 +622,7 @@ export function WorkerForm({
             </select>
           </label>
           <label>
-            What do you need next?
+            {session.spec.next_action_label || "What do you need next?"}
             <textarea
               rows={2}
               value={result.next_action}
@@ -561,8 +632,20 @@ export function WorkerForm({
             />
           </label>
           <div className="divider" />
+          {activeQuestions(session.spec, result).length > 0 && (
+            <div className="route-explanation">
+              Because your response indicates{" "}
+              <strong>{issueLabels[result.issue]?.toLowerCase()}</strong>, this
+              form asks {activeQuestions(session.spec, result).length}{" "}
+              contextual question
+              {activeQuestions(session.spec, result).length === 1 ? "" : "s"}.
+            </div>
+          )}
           <RuntimeContext.Provider
             value={{
+              followups,
+              setFollowup: (id, value) =>
+                setFollowups((f) => ({ ...f, [id]: value })),
               arranged,
               setArranged,
               photo,
