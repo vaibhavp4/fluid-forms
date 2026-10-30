@@ -25,3 +25,11 @@ build/
 # Local files
 .DS_Store
 *.log
+
+# Runtime data and local QA
+.data/
+*.db
+*.db-shm
+*.db-wal
+playwright-report/
+test-results/
