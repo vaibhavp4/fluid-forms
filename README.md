@@ -8,7 +8,7 @@ Built for the [Nebius × NVIDIA Global AI Hackathon](https://nebiusglobalaihacka
 
 ![Owner workspace showing a missing-evidence update](docs/screenshots/workspace.png)
 
-[Review walkthrough and recorded results](docs/REVIEW_GUIDE.md) · [Deployment](docs/DEPLOYMENT.md) · [MIT license](LICENSE)
+[Review walkthrough and recorded results](docs/REVIEW_GUIDE.md) · [C4 architecture diagrams](docs/ARCHITECTURE.md) · [Deployment](docs/DEPLOYMENT.md) · [MIT license](LICENSE)
 
 ## What works
 
@@ -58,6 +58,8 @@ npm --prefix web run build
 The experiment compares baseline and GEPA-selected program on separate synthetic held-out examples. Its report appears under **Improvements**; a recorded report is included for review without spending credits. Final smoke result: 8/8 for both, with the baseline retained. This is not a production reliability or optimization-gain claim. A failed or unimproved candidate does not replace the runtime program. Each experiment has a 56-request hard cap; it is optional for trying the product.
 
 ## Architecture and limits
+
+**[Explore three C4 layers: system context → containers → backend components](docs/ARCHITECTURE.md)**, including the exe.dev boundary, persistent storage, NVIDIA/Nebius model roles, and the separate offline GEPA harness.
 
 React/Vite + Vercel json-render; FastAPI + SQLAlchemy; DSPy + GEPA. SQLite is the default. `DATABASE_URL` can target PostgreSQL/Neon; that deployment path has not yet been tested. Form revisions are versioned data, not database schema migrations.
 
