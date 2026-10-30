@@ -4,6 +4,8 @@ Adaptive site updates for small contractors. Create a workflow, collect a worker
 
 Built for the [Nebius × NVIDIA Global AI Hackathon](https://nebiusglobalaihackathon.devpost.com/).
 
+**[Live demo](https://fluid-forms.exe.xyz/)** — owner access token is supplied privately in the judging/testing instructions.
+
 ![Owner workspace showing a missing-evidence update](docs/screenshots/workspace.png)
 
 [Review walkthrough and recorded results](docs/REVIEW_GUIDE.md) · [Deployment](docs/DEPLOYMENT.md) · [MIT license](LICENSE)
@@ -69,4 +71,4 @@ This is a single-workspace prototype. Set `OWNER_TOKEN` before external exposure
 - [Full product vision](docs/PRD.md)
 - [Hackathon rules and resources](docs/HACKATHON_OVERVIEW.md)
 
-Verified: 11 backend tests, production build, desktop/mobile browser journey, and live NVIDIA text/vision calls. Public demo and submission video URLs are still pending.
+Verified: 11 backend tests, production build, desktop/mobile HTTPS browser journey, live NVIDIA text/vision calls, and database/photo persistence after a service restart. Submission video URL is pending.

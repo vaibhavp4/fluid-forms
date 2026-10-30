@@ -16,11 +16,11 @@ Neon/PostgreSQL can replace SQLite using `DATABASE_URL`, but that production con
 
 Verify `/api/health`, then complete the review journey over HTTPS, including mobile upload and owner authentication. Give judges access through the judging period. Do not treat an untested URL or a process running only on a laptop as a hosted demo.
 
-## Proposed exe.dev deployment — awaiting approval
+## Live exe.dev deployment
 
-Recommended for the submission because the existing SQLite database and photo directory fit a persistent VM. This is an architecture recommendation, not an availability guarantee. No remote VM, paid subscription, secret, or public endpoint has been created.
+Deployed with owner approval on 30 October 2026 at **https://fluid-forms.exe.xyz/**, using a dedicated VM within the account's existing included capacity. No new subscription or plan upgrade was purchased. The Python service is managed by systemd, with SQLite and photos on persistent disk. Owner credentials are provided privately. The full HTTPS browser journey, live photo retake/exception handling, and record/photo persistence across a service restart have been verified.
 
-- Host the current GitHub source on one VM, using the default 2 vCPU / 4 GiB Personal pool if a new pool is needed.
+- The dedicated VM has 2 vCPUs, 4 GiB memory, and a 20 GB disk.
 - Build React once and serve it with the existing FastAPI application on port 8000. No local GPU is needed: NVIDIA inference stays on Nebius Token Factory.
 - Store database/photos under `/var/lib/fieldnote` on the persistent VM disk. The new deployment starts with an empty workspace; local review data is not copied automatically.
 - Run the service through systemd using [the prepared unit](../deploy/exe/fieldnote.service), so it restarts after failure/reboot.
@@ -32,4 +32,4 @@ exe.dev currently lists Personal from **$15/month**, including a 2 vCPU / 4 GiB 
 
 Modal is a viable alternative, with CPU web serving and usage-based hosting. Its Starter page currently lists $30/month in compute credits, subject to the actual account. Our current SQLite file must not simply be put on a shared Modal Volume: those volumes have commit/reload semantics and favor write-once/read-many data. A robust Modal route would externalize the database to PostgreSQL and adapt photo persistence, then verify restart/concurrency behavior. That is more work than the VM route for this submission. [Servers](https://modal.com/docs/guide/servers), [Volumes](https://modal.com/docs/guide/volumes), [pricing](https://modal.com/pricing).
 
-Required approval before proceeding: selected host/account, permission to provision/use its resources, and permission to expose the HTTPS demo. Authentication can then be completed through the provider's normal sign-in; do not paste provider credentials into chat.
+Recording notes, judging/testing credentials, and the submission handoff are saved locally outside Git. They are not part of the public repository or deployed source bundle.
