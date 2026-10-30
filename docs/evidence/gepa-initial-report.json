@@ -1,0 +1,153 @@
+{
+  "status": "complete",
+  "dataset_sha256": "1271e3ccba9cc96557bb83061328a7455a580a8a0f8987efb6b83b1345dd6a29",
+  "data_kind": "synthetic",
+  "test_count": 8,
+  "model": "nvidia/Nemotron-3_5-Lightning",
+  "algorithm": "GEPA",
+  "max_metric_calls": 18,
+  "baseline": {
+    "accuracy": 0.875,
+    "correct": 7,
+    "count": 8,
+    "duration_seconds": 4.97,
+    "cases": [
+      {
+        "id": "h1",
+        "expected": "wrong_material",
+        "actual": "wrong_material",
+        "correct": true,
+        "latency_ms": 704
+      },
+      {
+        "id": "h2",
+        "expected": "weather",
+        "actual": "weather",
+        "correct": true,
+        "latency_ms": 482
+      },
+      {
+        "id": "h3",
+        "expected": "none",
+        "actual": "none",
+        "correct": true,
+        "latency_ms": 604
+      },
+      {
+        "id": "h4",
+        "expected": "none",
+        "actual": "wrong_material",
+        "correct": false,
+        "latency_ms": 681
+      },
+      {
+        "id": "h5",
+        "expected": "late_delivery",
+        "actual": "late_delivery",
+        "correct": true,
+        "latency_ms": 552
+      },
+      {
+        "id": "h6",
+        "expected": "other",
+        "actual": "other",
+        "correct": true,
+        "latency_ms": 603
+      },
+      {
+        "id": "h7",
+        "expected": "uncertain",
+        "actual": "uncertain",
+        "correct": true,
+        "latency_ms": 680
+      },
+      {
+        "id": "h8",
+        "expected": "wrong_material",
+        "actual": "wrong_material",
+        "correct": true,
+        "latency_ms": 661
+      }
+    ]
+  },
+  "candidate": {
+    "accuracy": 0.875,
+    "correct": 7,
+    "count": 8,
+    "duration_seconds": 4.81,
+    "cases": [
+      {
+        "id": "h1",
+        "expected": "wrong_material",
+        "actual": "wrong_material",
+        "correct": true,
+        "latency_ms": 640
+      },
+      {
+        "id": "h2",
+        "expected": "weather",
+        "actual": "weather",
+        "correct": true,
+        "latency_ms": 596
+      },
+      {
+        "id": "h3",
+        "expected": "none",
+        "actual": "none",
+        "correct": true,
+        "latency_ms": 528
+      },
+      {
+        "id": "h4",
+        "expected": "none",
+        "actual": "wrong_material",
+        "correct": false,
+        "latency_ms": 569
+      },
+      {
+        "id": "h5",
+        "expected": "late_delivery",
+        "actual": "late_delivery",
+        "correct": true,
+        "latency_ms": 676
+      },
+      {
+        "id": "h6",
+        "expected": "other",
+        "actual": "other",
+        "correct": true,
+        "latency_ms": 518
+      },
+      {
+        "id": "h7",
+        "expected": "uncertain",
+        "actual": "uncertain",
+        "correct": true,
+        "latency_ms": 668
+      },
+      {
+        "id": "h8",
+        "expected": "wrong_material",
+        "actual": "wrong_material",
+        "correct": true,
+        "latency_ms": 611
+      }
+    ]
+  },
+  "decision": "Retain baseline: no held-out improvement",
+  "runtime_promotion": false,
+  "usage": {
+    "dispatched_requests": 38,
+    "request_limit": 56,
+    "max_prompt_characters": 50000,
+    "max_output_tokens_per_request": 2500,
+    "prompt_tokens": 17358,
+    "completion_tokens": 2887,
+    "task_calls": 37,
+    "reflection_calls": 1,
+    "reported_cost_usd": 0,
+    "cost_note": "Provider-reported estimates may be absent. Zero does not establish free inference."
+  },
+  "selection_note": "GEPA returned the original baseline: the reflected candidate scored worse on development examples. Both test columns therefore evaluate the selected baseline, not an improved prompt.",
+  "reasoning_mode": "disabled"
+}

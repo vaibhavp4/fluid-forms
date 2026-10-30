@@ -14,7 +14,7 @@ class ProviderError(Exception):
 
 
 class InterpretUpdate(dspy.Signature):
-    """Extract a worker's report, not verified facts. Distinguish wrong materials from late deliveries and resolved/hypothetical incidents. Mark uncertainty instead of inventing details. Return concise completed work, blocker, next action, issue category and summary."""
+    """Extract a worker's report, not verified facts. Distinguish wrong materials from late deliveries and resolved/hypothetical incidents. Mark uncertainty instead of inventing details. completed must contain ONLY explicitly finished work; use an empty string if none was stated. Work that is needed, blocked, or planned is never completed. next_action must preserve the stated request and timing, without inventing an action or commitment. Return concise completed work, blocker, next action, issue category and summary."""
 
     note: str = dspy.InputField()
     interpretation: Interpretation = dspy.OutputField()

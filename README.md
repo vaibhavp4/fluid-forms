@@ -4,6 +4,10 @@ Adaptive site updates for small contractors. Create a workflow, collect a worker
 
 Built for the [Nebius × NVIDIA Global AI Hackathon](https://nebiusglobalaihackathon.devpost.com/).
 
+![Owner workspace showing a missing-evidence update](docs/screenshots/workspace.png)
+
+[Review walkthrough and recorded results](docs/REVIEW_GUIDE.md) · [Deployment](docs/DEPLOYMENT.md) · [MIT license](LICENSE)
+
 ## What works
 
 - Template-based creation, preview, checks, and explicit publication.
@@ -36,7 +40,7 @@ Open **http://127.0.0.1:8000**. Stop the development API first if it already use
 
 ## Connect AI
 
-Set `NEBIUS_API_KEY` and a verified `NEBIUS_MODEL` in `.env`, then restart the server. NVIDIA Nemotron runs through Nebius Token Factory for generation, interpretation, and revision proposals. Configure `VISION_MODEL` for a compatible vision endpoint; optional `VISION_BASE_URL` and `VISION_API_KEY` override the Nebius connection.
+Set `NEBIUS_API_KEY` in `.env`, then restart the server. Verified model IDs: `nvidia/Nemotron-3_5-Lightning` for generation, interpretation, and revision proposals; `nvidia/Nemotron-3.5-Super-VL` for advisory delivery-photo checks. Both run through Nebius Token Factory. Optional `VISION_BASE_URL` and `VISION_API_KEY` override the Nebius connection.
 
 Without credentials, the app clearly labels **local demo mode**: curated templates and deterministic interpretation rules. Provider failures never silently fall back to demo results. Without vision access, photos are retained for human review. Browser voice recognition depends on browser support and permission; it is not NVIDIA transcription.
 
@@ -49,7 +53,7 @@ npm --prefix web run build
 .venv/bin/python -m evals.optimize --max-metric-calls 18 --max-seconds 600
 ```
 
-The experiment compares baseline and GEPA candidate on separate synthetic held-out examples. Its report appears under **Improvements**; it is not a production reliability claim. A failed or unimproved candidate does not replace the runtime program.
+The experiment compares baseline and GEPA-selected program on separate synthetic held-out examples. Its report appears under **Improvements**; a recorded report is included for review without spending credits. Final smoke result: 8/8 for both, with the baseline retained. This is not a production reliability or optimization-gain claim. A failed or unimproved candidate does not replace the runtime program. Each experiment has a 56-request hard cap; it is optional for trying the product.
 
 ## Architecture and limits
 
@@ -65,4 +69,4 @@ This is a single-workspace prototype. Set `OWNER_TOKEN` before external exposure
 - [Full product vision](docs/PRD.md)
 - [Hackathon rules and resources](docs/HACKATHON_OVERVIEW.md)
 
-Screenshots, a hosted demo, and the submission video will be linked after review. Open-source license selection remains pending before public submission.
+Verified: 11 backend tests, production build, desktop/mobile browser journey, and live NVIDIA text/vision calls. Public demo and submission video URLs are still pending.

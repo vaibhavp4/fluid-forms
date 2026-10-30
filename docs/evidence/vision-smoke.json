@@ -1,0 +1,29 @@
+{
+  "fixture": "synthetic blank gray image; negative-only smoke check",
+  "result": {
+    "visibility": "not_visible",
+    "explanation": "The image is a solid gray field with no discernible objects, text, or packaging visible. Therefore, no packaging or delivery label is present.",
+    "provider": "nvidia/Nemotron-3.5-Super-VL",
+    "usage": {
+      "completion_tokens": 201,
+      "prompt_tokens": 334,
+      "total_tokens": 535,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 154,
+        "rejected_prediction_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": 0,
+        "created_cache_tokens": 0,
+        "multimodal_tokens": {
+          "image": 258
+        }
+      }
+    },
+    "latency_ms": 1839,
+    "status": "retake"
+  }
+}

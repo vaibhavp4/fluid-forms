@@ -555,6 +555,8 @@ def review_submission(submission_id: str, body: ReviewDecision):
 @app.get("/api/evaluations", dependencies=[Depends(owner)])
 def evaluation_reports():
     path = Path(".data/evaluation-report.json")
+    if not path.exists():
+        path = Path("docs/evidence/gepa-report.json")
     import json
 
     return (

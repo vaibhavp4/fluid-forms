@@ -137,6 +137,9 @@ def main():
     report = {
         "status": "complete",
         "dataset_sha256": hashlib.sha256(raw).hexdigest(),
+        "baseline_instructions_sha256": hashlib.sha256(
+            baseline.signature.instructions.encode()
+        ).hexdigest(),
         "data_kind": "synthetic",
         "test_count": len(data["test"]),
         "model": os.getenv("NEBIUS_MODEL", "nvidia/Nemotron-3_5-Lightning"),

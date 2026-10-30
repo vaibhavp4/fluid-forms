@@ -53,7 +53,7 @@ export function ImprovementsView({
         {experiment?.status === "complete" ? (
           <>
             <p>
-              Baseline and GEPA candidate on a held-out set of{" "}
+              Recorded baseline and GEPA-selected program on a held-out set of{" "}
               {experiment.test_count} synthetic examples.
             </p>
             <div className="experiment-metrics">
@@ -64,7 +64,7 @@ export function ImprovementsView({
                 </strong>
               </div>
               <div>
-                <small>Candidate issue accuracy</small>
+                <small>Selected program accuracy</small>
                 <strong>
                   {Math.round(experiment.candidate.accuracy * 100)}%
                 </strong>
