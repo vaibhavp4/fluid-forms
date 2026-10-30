@@ -2,7 +2,7 @@
 
 29 October 2026 · Proposed architecture · Companion to [the PRD](PRD.md)
 
-This records intended choices, their assumptions, alternatives, and the evidence needed to adopt them. It is not a record of completed integrations or benchmark results. Update, 30 October: the web application and provider adapters are implemented. Live model access and the optimization experiment remain unverified without credentials. See [current build decisions](BUILD_DECISIONS.md), which supersede earlier proposed choices below. “Nebius” is the infrastructure provider referred to in the discussion.
+This preserves the original architecture proposals, assumptions, alternatives, and evaluation plan. Update, 30 October: live NVIDIA text and vision inference through Nebius, the bounded offline GEPA experiment, and the deployed anonymous sandbox have been verified. The recorded GEPA run retained the baseline; no improvement is claimed. See [current build decisions](BUILD_DECISIONS.md), [architecture](ARCHITECTURE.md), and [review evidence](REVIEW_GUIDE.md) for the implemented scope. Proposed components below remain product vision unless those documents confirm them.
 
 ## Decision status and architectural claim
 

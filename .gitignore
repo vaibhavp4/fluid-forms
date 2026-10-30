@@ -25,6 +25,15 @@ build/
 # Local files
 .DS_Store
 *.log
+# Private hackathon copy, recording notes, credentials and submission media.
+.local-submission/
+local-submission/
+**/SUBMISSION_DRAFT.md
+**/submission-draft.md
+**/submission-handoff.md
+**/project-details.md
+**/video-script.md
+**/model-platform-feedback.md
 
 # Runtime data and local QA
 .data/

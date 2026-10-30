@@ -1,6 +1,6 @@
-# Fieldnote UI system
+# Fluid Forms UI system
 
-Generated concept: workspace-concept.png. Built-in Image Gen used for the full owner workspace reference.
+Original construction-workflow concept: workspace-concept.png. Built-in Image Gen supplied the initial owner workspace reference. The current product spans 15 templates; [current screenshots](../docs/screenshots/) show the implemented interface.
 
 Prompt: clean contractor workspace with a 220px sidebar, Site updates heading, recent response table, selected response detail, amber missing-evidence note, green Improve this workflow action, and published form strip. White surfaces on cool #f6f7f9, forest #246452 actions, ink #182322. No marketing hero or decorative imagery.
 

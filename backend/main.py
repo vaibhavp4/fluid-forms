@@ -37,7 +37,7 @@ from .demo import (
 )
 
 validate_demo_environment()
-app = FastAPI(title="Fieldnote", version="0.1.0")
+app = FastAPI(title="Fluid Forms", version="0.1.0")
 store.Base.metadata.create_all(store.engine)
 
 

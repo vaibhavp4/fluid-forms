@@ -15,7 +15,7 @@ class ErrorBoundary extends React.Component<
       <main className="worker-page">
         <h1>Something went wrong.</h1>
         <p>Your saved updates are still on the server. Reload to reconnect.</p>
-        <button onClick={() => location.reload()}>Reload Fieldnote</button>
+        <button onClick={() => location.reload()}>Reload Fluid Forms</button>
       </main>
     ) : (
       this.props.children

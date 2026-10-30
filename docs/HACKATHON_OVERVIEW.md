@@ -114,10 +114,10 @@ The email's upload-form URL was not included in the pasted text. Retrieve it fro
 - [x] Add installation, configuration, run/test commands and screenshots to the root README.
 - [x] Preserve the repository's MIT license and publish source/assets required to reproduce the demo.
 - [x] Record specific onboarding/tool feedback during implementation.
-- [ ] Deploy a persistent HTTPS demo after the owner's approval and add its URL to the README.
-- [ ] Test judge access and capture the final public demo video.
-- [ ] Recheck official rules and submit the actual working scope.
+- [x] Deploy a persistent HTTPS demo with owner approval and add its URL to the README.
+- [x] Verify anonymous judge access and the complete desktop/mobile workflow.
+- [x] Submit the project link, as confirmed by the owner. Video and final form details are managed in the local submission documents.
 
-See [deployment notes](DEPLOYMENT.md). Submission copy and recording scripts are maintained locally outside Git.
+See [deployment notes](DEPLOYMENT.md) and the [public review guide](REVIEW_GUIDE.md). Submission copy, credentials and recording scripts are maintained locally outside Git.
 
 Keep API keys, private account details, customer evidence, and test-user passwords out of this public reference document.

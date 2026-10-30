@@ -1,7 +1,7 @@
-# Prepared for an exe.dev VM; not installed or deployed.
-# Provision the fieldnote user and /opt/fluid-forms before installing this unit.
+# Original private workspace deployed on exe.dev.
+# Legacy service/storage names are retained to preserve existing data and access.
 [Unit]
-Description=Fieldnote adaptive site updates
+Description=Fluid Forms private workspace
 Wants=network-online.target
 After=network-online.target
 

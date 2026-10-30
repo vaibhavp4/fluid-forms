@@ -3,9 +3,9 @@
 The verified setup is the single-server local build in the root README. A Dockerfile is provided for a host with a persistent disk. The Docker daemon was unavailable in the development environment, so the container build itself has not been verified.
 
 ```sh
-docker build -t fieldnote .
+docker build -t fluid-forms .
 # .env must include a nonempty OWNER_TOKEN before external exposure.
-docker run --env-file .env -p 8000:8000 -v fieldnote-data:/app/.data fieldnote
+docker run --env-file .env -p 8000:8000 -v fluid-forms-data:/app/.data fluid-forms
 ```
 
 The server listens on port 8000. Configure HTTPS at the hosting platform. Keep `.data` on persistent storage: it contains the SQLite database and photos. The Docker build context excludes local credentials, runtime data, and dependencies. Never bake `.env` into the image.
@@ -21,11 +21,11 @@ Verify `/api/health`, then complete the review journey over HTTPS, including mob
 Deployed with owner approval on 30 October 2026 at **https://fluid-forms.exe.xyz/**, using a dedicated VM within the account's existing included capacity. No new subscription or plan upgrade was purchased. Python services are managed by systemd, with SQLite and photos on persistent disk. The original workspace remains token protected; the public URL now targets a separate anonymous sandbox as described below. The full HTTPS browser journey, live photo retake/exception handling, and record/photo persistence across a service restart have been verified.
 
 - The dedicated VM has 2 vCPUs, 4 GiB memory, and a 20 GB disk.
-- Build React once and serve it with the existing FastAPI application on port 8000. No local GPU is needed: NVIDIA inference stays on Nebius Token Factory.
-- Store database/photos under `/var/lib/fieldnote` on the persistent VM disk. The new deployment starts with an empty workspace; local review data is not copied automatically.
-- Run the service through systemd using [the prepared unit](../deploy/exe/fieldnote.service), so it restarts after failure/reboot.
-- Supply Nebius credentials and a fresh owner access token in a root-owned `/etc/fieldnote/fieldnote.env`, readable only by root; systemd injects its variables. Do not store them in source or the image. Provision Python dependencies where the service user can read them, rather than under a root-only home directory.
-- Proxy port 8000 through exe.dev's managed HTTPS. Make that single web endpoint public only after owner authorization and authenticated smoke checks. Keep owner API actions behind the existing token; provide the judge token privately in Devpost testing instructions.
+- Build React once and serve it with FastAPI. The public sandbox uses port 8080; the original private workspace uses port 8000. No local GPU is needed: NVIDIA inference stays on Nebius Token Factory.
+- Sandbox database/photos live under `/var/lib/fluidforms-demo`; private records remain under `/var/lib/fieldnote`. Local review data is not copied into either deployment automatically.
+- Run the separate [sandbox](../deploy/exe/fieldnote-demo.service) and [private](../deploy/exe/fieldnote.service) systemd services so they restart after failure/reboot.
+- Supply credentials through separate root-readable environment files; systemd injects their variables. Keep credentials out of source and the image. Provision Python dependencies where each service user can read them.
+- Proxy port 8080 through exe.dev's managed HTTPS. The submitted URL opens the sample-data sandbox without signup or an owner token. The original port 8000 remains private; use an SSH tunnel and the original token for owner access.
 - Verify uploads, persistence across a restart, and the complete live journey on the deployed URL. Keep the service/account active through 23 December 2026.
 
 exe.dev currently lists Personal from **$15/month**, including a 2 vCPU / 4 GiB pool; hosting charges are separate from the user's $25 Nebius inference credit. Confirm the actual account plan and checkout before any purchase. The seven-day trial alone does not cover judging. [Pricing](https://exe.dev/pricing), [persistent VMs](https://exe.dev/docs/what-is-exe), [HTTPS/visibility](https://exe.dev/docs/proxy).

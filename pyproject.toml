@@ -1,7 +1,7 @@
 [project]
-name = "fieldnote"
+name = "fluid-forms"
 version = "0.1.0"
-description = "Versioned adaptive site updates with evaluated improvements"
+description = "Contextual forms with typed workflows and evaluated, owner-approved improvements"
 requires-python = ">=3.11,<3.14"
 dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1", "sqlalchemy>=2.0,<3", "pydantic-settings>=2.7,<3", "python-multipart>=0.0.20", "httpx>=0.28,<1", "pillow>=11,<13", "dspy>=3,<4", "psycopg[binary]>=3.2,<4"]
 [dependency-groups]

@@ -14,7 +14,7 @@ This PRD describes the intended finished product first. The hackathon slice near
 
 ## Current implementation scope
 
-The daily-site-update journey was approved on 30 October. The build is web-only, uses Vercel json-render, and stores immutable form contracts with SQLAlchemy. See [build decisions](BUILD_DECISIONS.md) for the current implementation; the broader capabilities below remain the product vision.
+The current build supports 15 starter templates, with end-of-course feedback as the primary contextual-question journey and daily site updates as an evidence/photo example. It is web-only, uses Vercel json-render, and stores immutable form contracts with SQLAlchemy. The live URL opens a separate anonymous sample-data sandbox. See [build decisions](BUILD_DECISIONS.md) and [architecture](ARCHITECTURE.md) for implemented behavior; the broader capabilities below remain the product vision.
 
 ## Assumptions
 - Owners use a browser workspace for creation, review, and approvals. Workers open mobile-friendly browser links. WhatsApp integration was removed from the MVP.

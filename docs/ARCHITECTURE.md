@@ -12,18 +12,18 @@ Blue nodes are Fluid Forms software, grey nodes are external systems, green node
 flowchart LR
     owner["Business owner / office reviewer<br/>[Person]<br/>Configures workflows<br/>Approves changes"]
     worker["Respondent<br/>[Person]<br/>Shares experience<br/>Confirms details and evidence"]
-    fieldnote["Fluid Forms<br/>[Software system]<br/>Contextual forms<br/>Owner-approved revisions"]
+    fluidforms["Fluid Forms<br/>[Software system]<br/>Contextual forms<br/>Owner-approved revisions"]
     nebius["Nebius Token Factory<br/>[External software system]<br/>NVIDIA text and vision inference"]
 
-    owner -->|"Configure, publish and review via web app"| fieldnote
-    worker -->|"Submit updates and photos via web app"| fieldnote
-    fieldnote -->|"HTTPS API: typed text inference and image interpretation"| nebius
+    owner -->|"Configure, publish and review via web app"| fluidforms
+    worker -->|"Submit updates and photos via web app"| fluidforms
+    fluidforms -->|"HTTPS API: typed text inference and image interpretation"| nebius
 
     classDef person fill:#e7f4ed,stroke:#32775a,color:#163c2d
     classDef app fill:#e8f0ff,stroke:#3868a8,color:#16345c
     classDef external fill:#f0f1f3,stroke:#6b7280,color:#303540
     class owner,worker person
-    class fieldnote app
+    class fluidforms app
     class nebius external
 ```
 
