@@ -132,6 +132,8 @@ export type Workspace = {
   submission: Submission[];
 };
 export type Health = {
+  public_demo?: boolean;
+  demo_ai_usage?: { used: number; limit: number } | null;
   ok: boolean;
   mode: string;
   model: string | null;

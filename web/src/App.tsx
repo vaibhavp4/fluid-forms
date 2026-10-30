@@ -162,6 +162,12 @@ export default function App() {
   if (workerId)
     return (
       <>
+        {health?.public_demo && (
+          <div className="public-demo-banner">
+            Shared public demo · Sample data only. Responses and changes are
+            visible to other visitors.
+          </div>
+        )}
         <div
           className={`runtime-ribbon ${health?.mode === "live" ? "live" : ""}`}
         >
@@ -233,7 +239,9 @@ export default function App() {
         <div className="sidebar-bottom">
           <div className="workspace-avatar">M</div>
           <div>
-            <strong>My workspace</strong>
+            <strong>
+              {health?.public_demo ? "Shared demo" : "My workspace"}
+            </strong>
             <small>
               {health?.mode === "live"
                 ? "Connected to Nebius"
@@ -255,6 +263,15 @@ export default function App() {
         </div>
       </aside>
       <main className="main">
+        {health?.public_demo && (
+          <div className="public-demo-banner">
+            <strong>Public sandbox · no signup required</strong>
+            <span>
+              Use sample data only. Responses and changes are shared. Live AI
+              usage is limited to protect the demo budget.
+            </span>
+          </div>
+        )}
         <div className="runtime-line">
           <span
             className={`connection-dot ${health?.mode === "live" ? "connected" : ""}`}

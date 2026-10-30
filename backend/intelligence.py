@@ -8,6 +8,7 @@ import dspy
 import httpx
 from .contracts import FormSpec, Interpretation, PhotoObservation, FollowUpRule, Issue
 from .templates import template
+from .demo import public_demo, reserve, DemoLimitError
 
 
 class ProviderError(Exception):
@@ -70,6 +71,14 @@ def live():
 
 
 def lm(model_class=dspy.LM):
+    if public_demo() and model_class is dspy.LM:
+
+        class DemoLM(dspy.LM):
+            def forward(self, prompt=None, messages=None, **kwargs):
+                reserve("ai")
+                return super().forward(prompt=prompt, messages=messages, **kwargs)
+
+        model_class = DemoLM
     return model_class(
         "openai/" + os.getenv("NEBIUS_MODEL", "nvidia/Nemotron-3_5-Lightning"),
         api_key=os.environ["NEBIUS_API_KEY"],
@@ -97,6 +106,8 @@ def predict(signature, **kwargs):
             "usage": history.get("usage", {}),
             "cost_usd": history.get("cost"),
         }
+    except DemoLimitError:
+        raise
     except Exception as exc:
         raise ProviderError(
             "The model request failed. Check endpoint, model access and credentials, then retry. No demo result was substituted."
@@ -306,6 +317,7 @@ def inspect_photo(data_url):
         }
     start = time.monotonic()
     try:
+        reserve("ai")
         with httpx.Client(timeout=45) as client:
             response = client.post(
                 (

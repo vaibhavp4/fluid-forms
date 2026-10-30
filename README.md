@@ -4,7 +4,7 @@ Contextual forms that turn unstructured responses into structured data and impro
 
 Built for the [Nebius × NVIDIA Global AI Hackathon](https://nebiusglobalaihackathon.devpost.com/).
 
-**[Live demo](https://fluid-forms.exe.xyz/)** — owner access token is supplied privately in the judging/testing instructions.
+**[Live demo](https://fluid-forms.exe.xyz/)** — shared public sandbox; no signup or access token required. Use sample data only: responses and workflow changes are visible to other visitors.
 
 ![Fluid Forms workspace showing contextual feedback and improvement activity](docs/screenshots/workspace.png)
 
@@ -69,7 +69,7 @@ The experiment compares baseline and GEPA-selected program on separate synthetic
 
 React/Vite + Vercel json-render; FastAPI + SQLAlchemy; DSPy + GEPA. SQLite is the default. `DATABASE_URL` can target PostgreSQL/Neon; that deployment path has not yet been tested. Form revisions are versioned data, not database schema migrations.
 
-This is a single-workspace prototype. Set `OWNER_TOKEN` before external exposure; worker links/session IDs act as bearer access. Photos require office review, model thresholds are not calibrated, and live model/voice/device testing depends on configured services. No WhatsApp integration, browser model training, or arbitrary generated-code execution.
+This is a single-workspace prototype. Private deployments use `OWNER_TOKEN`; worker links/session IDs act as bearer access. The hosted anonymous sandbox runs separately with its own database, photos and persistent AI/write limits, preserving the private workspace. See [sandbox configuration](docs/DEPLOYMENT.md#anonymous-public-sandbox). Photos require office review, model thresholds are not calibrated, and live model/voice/device testing depends on configured services. No WhatsApp integration, browser model training, or arbitrary generated-code execution.
 
 ## Project notes
 
@@ -81,4 +81,4 @@ This is a single-workspace prototype. Set `OWNER_TOKEN` before external exposure
 - [Full product vision](docs/PRD.md)
 - [Hackathon rules and resources](docs/HACKATHON_OVERVIEW.md)
 
-Verified: 13 backend tests, production build, desktop/mobile HTTPS browser journey, live NVIDIA text/vision calls, and database/photo persistence after a service restart. Submission video URL is pending.
+Verification covers backend regression/access tests, production build, desktop/mobile HTTPS browser journey, live NVIDIA text/vision calls, and database/photo persistence after a service restart.

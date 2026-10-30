@@ -28,7 +28,15 @@ from .contracts import *
 from . import intelligence as ai
 from .evaluation import artifact_hash, evaluate_spec
 from .templates import TEMPLATES
+from .demo import (
+    public_demo,
+    validate_demo_environment,
+    reserve,
+    DemoLimitError,
+    ai_usage,
+)
 
+validate_demo_environment()
 app = FastAPI(title="Fieldnote", version="0.1.0")
 store.Base.metadata.create_all(store.engine)
 
@@ -48,6 +56,8 @@ MEDIA.mkdir(parents=True, exist_ok=True)
 
 
 def owner(authorization: str = Header(default="")):
+    if public_demo():
+        return
     token = os.getenv("OWNER_TOKEN")
     if token and not hmac.compare_digest(authorization, f"Bearer {token}"):
         raise HTTPException(401, "Owner access required")
@@ -68,6 +78,8 @@ def mutable(session):
 def provider_call(fn, *args):
     try:
         return fn(*args)
+    except DemoLimitError as exc:
+        raise HTTPException(429, str(exc), headers={"Retry-After": "60"}) from exc
     except ai.ProviderError as exc:
         raise HTTPException(502, str(exc)) from exc
 
@@ -84,8 +96,51 @@ def health():
             os.getenv("VISION_MODEL")
             and (os.getenv("VISION_API_KEY") or os.getenv("NEBIUS_API_KEY"))
         ),
-        "owner_auth": bool(os.getenv("OWNER_TOKEN")),
+        "owner_auth": bool(os.getenv("OWNER_TOKEN")) and not public_demo(),
+        "public_demo": public_demo(),
+        "demo_ai_usage": ai_usage(),
     }
+
+
+@app.middleware("http")
+async def public_demo_limits(request, call_next):
+    if (
+        public_demo()
+        and request.url.path.startswith("/api/")
+        and request.method in ["POST", "PUT", "PATCH", "DELETE"]
+    ):
+        length = request.headers.get("content-length")
+        bodyless = (
+            request.url.path.endswith(("/evaluate", "/submit", "/seed"))
+            or "/rollback/" in request.url.path
+        )
+        max_body = 9 * 1024 * 1024 if request.url.path.endswith("/photo") else 64 * 1024
+        if length is None and not bodyless:
+            return JSONResponse(
+                status_code=411,
+                content={
+                    "detail": "Content-Length is required for public demo writes."
+                },
+            )
+        try:
+            if length is not None and (int(length) < 0 or int(length) > max_body):
+                return JSONResponse(
+                    status_code=413,
+                    content={"detail": "Request exceeds the public demo upload limit."},
+                )
+        except ValueError:
+            return JSONResponse(
+                status_code=400, content={"detail": "Invalid Content-Length."}
+            )
+        try:
+            reserve("write")
+        except DemoLimitError as exc:
+            return JSONResponse(
+                status_code=429,
+                content={"detail": str(exc)},
+                headers={"Retry-After": "60"},
+            )
+    return await call_next(request)
 
 
 @app.get("/api/workspace", dependencies=[Depends(owner)])
@@ -377,6 +432,16 @@ async def photo(
             "Upload a decodable photo at least 100 pixels wide and tall, up to 24 megapixels",
         ) from exc
     import asyncio
+
+    if (
+        public_demo()
+        and sum(p.stat().st_size for p in MEDIA.glob("*.jpg")) + len(normalized)
+        > 100 * 1024 * 1024
+    ):
+        raise HTTPException(
+            413,
+            "The shared demo photo allowance is full. Try the text workflow or an evidence exception.",
+        )
 
     observation = await asyncio.to_thread(
         ai.inspect_photo,
