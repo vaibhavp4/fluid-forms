@@ -462,7 +462,7 @@ The failure must be real in the demonstrated version and identified as a prepare
 5. Add only the stretch capabilities that fit remaining time and pass real tests.
 6. Package the demo, public repository, license, setup guide, limitations, and measured results.
 
-The official deadline is 30 October 2026 at 10:00 PDT, or 17:00 London. Reserve time for the public video under three minutes and submission materials. Keep the working project available through the end of judging on 15 December. The proposed track is Best Apps and Agents. The required runtime Nebius use and NVIDIA model must be visible in the actual implementation. [Official rules](https://nebiusglobalaihackathon.devpost.com/rules).
+The official deadline is 30 October 2026 at 10:00 PDT, or 17:00 London. Reserve time for the public video under three minutes and submission materials. Keep the working project available through the end of judging on **23 December**, per the rules rechecked on 30 October. The proposed track is Best Apps and Agents. The required runtime Nebius use and NVIDIA model must be visible in the actual implementation. [Official rules](https://nebiusglobalaihackathon.devpost.com/rules).
 
 ## Decisions for the next discussion
 

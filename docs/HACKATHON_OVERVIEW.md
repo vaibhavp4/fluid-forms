@@ -1,6 +1,6 @@
 # Hackathon overview, rules, and resources
 
-Reference snapshot: 29 October 2026
+Reference snapshot: 30 October 2026, rechecked against the official rules
 
 ## Our entry
 
@@ -24,7 +24,7 @@ Reference snapshot: 29 October 2026
 
 ## Dates and submission essentials
 
-Submission deadline: **30 October 2026, 10:00 PDT / 17:00 London**. Judging: December 1–15, 2026. Winners expected around January 11, 2027.
+Submission deadline: **30 October 2026, 10:00 PDT / 17:00 London**. Current judging period: **December 9–23, 2026**. Winners expected around **January 25, 2027**. These judging/announcement dates supersede the earlier snapshot. Keep the demo accessible through December 23.
 
 - Build working software using a runtime Token Factory call or Nebius AI Cloud compute, plus an NVIDIA open-source model.
 - Choose a track: Coding and Agentic Engineering, Best Apps and Agents, Personal AI, or Physical AI.
@@ -108,13 +108,16 @@ The email's upload-form URL was not included in the pasted text. Retrieve it fro
 
 ## Submission preparation for this project
 
-- [ ] Verify live model calls and record actual service/model IDs.
-- [ ] Complete one coherent workflow and document limitations.
-- [ ] Record baseline versus optimized held-out results, including costs.
-- [ ] Add installation, configuration, run/test commands, screenshots, and demo links to the root README.
-- [ ] Select a license and publish source/assets required to reproduce the demo.
-- [ ] Record specific onboarding/tool feedback during implementation.
+- [x] Verify live model calls and record actual service/model IDs.
+- [x] Complete one coherent workflow and document limitations.
+- [x] Record baseline versus GEPA-selected held-out results, with token usage and cost estimates; no optimization gain claimed.
+- [x] Add installation, configuration, run/test commands and screenshots to the root README.
+- [x] Preserve the repository's MIT license and publish source/assets required to reproduce the demo.
+- [x] Record specific onboarding/tool feedback during implementation.
+- [ ] Deploy a persistent HTTPS demo after the owner's approval and add its URL to the README.
 - [ ] Test judge access and capture the final public demo video.
 - [ ] Recheck official rules and submit the actual working scope.
+
+See [deployment notes](DEPLOYMENT.md). Submission copy and recording scripts are maintained locally outside Git.
 
 Keep API keys, private account details, customer evidence, and test-user passwords out of this public reference document.
