@@ -50,7 +50,9 @@ export function ImprovementsView({
           <FlaskConical size={21} />
           <h2>Model optimization</h2>
         </div>
-        {experiment?.status === "complete" ? (
+        {experiment === null ? (
+          <p className="muted">Loading recorded model evaluation…</p>
+        ) : experiment?.status === "complete" ? (
           <>
             <p>
               Recorded baseline and GEPA-selected program on a held-out set of{" "}
@@ -71,9 +73,8 @@ export function ImprovementsView({
               </div>
             </div>
             <p className="helper">
-              {experiment.selection_note} {" "}
-              {experiment.decision}. This is an offline experiment, not an
-              automatic production model change.
+              {experiment.selection_note} {experiment.decision}. This is an
+              offline experiment, not an automatic production model change.
             </p>
           </>
         ) : (

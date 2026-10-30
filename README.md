@@ -6,7 +6,7 @@ Built for the [Nebius × NVIDIA Global AI Hackathon](https://nebiusglobalaihacka
 
 **[Live demo](https://fluid-forms.exe.xyz/)** — owner access token is supplied privately in the judging/testing instructions.
 
-![Owner workspace showing a missing-evidence update](docs/screenshots/workspace.png)
+![Fluid Forms workspace showing contextual feedback and improvement activity](docs/screenshots/workspace.png)
 
 [Review walkthrough and recorded results](docs/REVIEW_GUIDE.md) · [C4 architecture diagrams](docs/ARCHITECTURE.md) · [Deployment](docs/DEPLOYMENT.md) · [MIT license](LICENSE)
 
@@ -21,6 +21,8 @@ Built for the [Nebius × NVIDIA Global AI Hackathon](https://nebiusglobalaihacka
 - Dashboard improvement activity with model calls, routing decisions, checks and publication history.
 - Feedback-driven revisions, immutable versions, pinned sessions, and rollback.
 - Separate contract regression checks and a runnable offline DSPy/GEPA experiment.
+
+![Template selection and assembled capability graph](docs/screenshots/template-graph.png)
 
 ## Run locally
 
