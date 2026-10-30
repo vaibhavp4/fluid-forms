@@ -1,25 +1,49 @@
 """Deterministic contract regression checks, distinct from model-quality evidence."""
+
 import hashlib
 import json
 from .contracts import FormSpec, Interpretation, photo_required
+
 
 def artifact_hash(spec):
     data = spec.model_dump() if isinstance(spec, FormSpec) else spec
     return hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()
 
+
 def evaluate_spec(spec, baseline=None):
     cases = []
+
     def check(name, passed):
-        cases.append({'name': name, 'passed': bool(passed)})
-    for issue, name in [('wrong_material','Wrong materials request evidence'), ('weather','Weather delay stays unchanged'), ('late_delivery','Late delivery is not a wrong delivery'), ('none','Normal update stays short'), ('uncertain','Uncertain issue is not automatically treated as a wrong delivery')]:
-        result = Interpretation(completed='', blocker='',next_action='',summary='',issue=issue)
-        expected = spec.require_delivery_photo and issue == 'wrong_material'
-        check(name, photo_required(spec,result) == expected)
-    check('Exception route remains available', spec.allow_exception)
-    check('Worker prompt is present', bool(spec.note_prompt.strip()))
-    check('Evidence prompt is present', bool(spec.evidence_prompt.strip()))
-    check('Site choices are unique and nonempty', len(set(spec.sites)) == len(spec.sites) and all(x.strip() for x in spec.sites))
+        cases.append({"name": name, "passed": bool(passed)})
+
+    for issue, name in [
+        ("wrong_material", "Wrong materials request evidence"),
+        ("weather", "Weather delay stays unchanged"),
+        ("late_delivery", "Late delivery is not a wrong delivery"),
+        ("none", "Normal update stays short"),
+        (
+            "uncertain",
+            "Uncertain issue is not automatically treated as a wrong delivery",
+        ),
+    ]:
+        result = Interpretation(
+            completed="", blocker="", next_action="", summary="", issue=issue
+        )
+        expected = spec.require_delivery_photo and issue == "wrong_material"
+        check(name, photo_required(spec, result) == expected)
+    check("Exception route remains available", spec.allow_exception)
+    check("Worker prompt is present", bool(spec.note_prompt.strip()))
+    check("Evidence prompt is present", bool(spec.evidence_prompt.strip()))
+    check(
+        "Site choices are unique and nonempty",
+        len(set(spec.sites)) == len(spec.sites) and all(x.strip() for x in spec.sites),
+    )
     if baseline:
-        check('Existing sites preserved', spec.sites == baseline.sites)
-    return {'kind':'contract_regression','passed':all(x['passed'] for x in cases), 'cases':cases,
-            'artifact_hash':artifact_hash(spec), 'note':'These checks verify form policy against known issue labels. They do not measure model interpretation or image accuracy.'}
+        check("Existing sites preserved", spec.sites == baseline.sites)
+    return {
+        "kind": "contract_regression",
+        "passed": all(x["passed"] for x in cases),
+        "cases": cases,
+        "artifact_hash": artifact_hash(spec),
+        "note": "These checks verify form policy against known issue labels. They do not measure model interpretation or image accuracy.",
+    }

@@ -2,7 +2,7 @@
 
 29 October 2026 · Proposed architecture · Companion to [the PRD](PRD.md)
 
-This records intended choices, their assumptions, alternatives, and the evidence needed to adopt them. It is not a record of completed integrations or benchmark results. No application, model integration, or optimization experiment has been implemented yet. “Nebius” is the infrastructure provider referred to in the discussion.
+This records intended choices, their assumptions, alternatives, and the evidence needed to adopt them. It is not a record of completed integrations or benchmark results. Update, 30 October: the web application and provider adapters are implemented. Live model access and the optimization experiment remain unverified without credentials. See [current build decisions](BUILD_DECISIONS.md), which supersede earlier proposed choices below. “Nebius” is the infrastructure provider referred to in the discussion.
 
 ## Decision status and architectural claim
 

@@ -1,6 +1,6 @@
 # Demo journey: a site update that learns what the office needs
 
-Proposal for review · 29 October 2026 · No implementation started
+Approved journey · 30 October 2026 · Web-only implementation in progress
 
 ## Product promise
 
@@ -40,7 +40,7 @@ The product presents a working preview and a readable outline:
 
 Job and date checks use ordinary validation. Spoken meaning is interpreted. The follow-up wording can vary, but it must ask for an approved category of information. The template supplies the initial structure; Maya is not asked to invent every question.
 
-She tries a sample response in preview and clicks **Publish version 1**. The app returns a worker link. A WhatsApp share action is an eventual distribution surface; the demo need not depend on live WhatsApp onboarding.
+She tries a sample response in preview and clicks **Publish version 1**. The app returns a worker link. Distribution uses a copied browser link. WhatsApp integration is out of scope.
 
 ### 2. Sam submits a useful but incomplete update
 

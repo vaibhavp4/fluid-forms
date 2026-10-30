@@ -33,3 +33,5 @@ build/
 *.db-wal
 playwright-report/
 test-results/
+
+*.tsbuildinfo

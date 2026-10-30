@@ -4,17 +4,21 @@ Draft for discussion · Declarative optimization architecture · 29 October 2026
 
 ## Product vision
 
-Enable a small business owner or operations manager to select a survey template, import an existing checklist, or describe a workflow through WhatsApp, then publish an adaptive application for customers or field staff. People complete it using text, documents, images, measurements, or speech. The system compiles the approved requirements into a versioned form program, verifies its behavior, and proposes improvements using observed failures and business feedback.
+Enable a small business owner or operations manager to select a survey template, import an existing checklist, or describe a workflow in a web workspace, then publish an adaptive application for customers or field staff. People complete it using text, documents, images, measurements, or speech. The system compiles the approved requirements into a versioned form program, verifies its behavior, and proposes improvements using observed failures and business feedback.
 
 The product should reduce the work required to obtain a usable submission, including avoidable return visits to collect missing evidence. A completed form is valuable when the business can act on its contents. Collected evidence, machine validation, and professional sign-off are separate states.
 
 The long-term architectural contribution is a form compiler whose intelligent capabilities are declarative, measurable programs and model calls - it can assemble and improve pipelines of models (ideally edge sized running on webgpu) to collect, process, and adapt to information being supplied. Each capability specifies its inputs, outputs, approved meaning, constraints, and evaluation criteria; a bounded optimization process searches for better implementations. Frequent tasks may eventually be specialized into smaller models or ordinary code when independently verified. The compiler, generated form, execution history, and evaluations are individually versioned. Changes to an individual form and changes to the generator are separate release processes.
 
-This PRD describes the intended finished product first. The hackathon slice near the end is a proposal for discussion, not a finalized scope or an implementation claim. Currently the repository contains Git metadata and a .gitignore; no product is implemented.
+This PRD describes the intended finished product first. The hackathon slice near the end is a proposal for discussion, not a finalized scope or an implementation claim. A web-only implementation now exists; see BUILD_DECISIONS.md and the root README for current scope and verification limits. This document retains the broader product vision.
+
+## Current implementation scope
+
+The daily-site-update journey was approved on 30 October. The build is web-only, uses Vercel json-render, and stores immutable form contracts with SQLAlchemy. See [build decisions](BUILD_DECISIONS.md) for the current implementation; the broader capabilities below remain the product vision.
 
 ## Assumptions
-- WhatsApp is the convenient entry point for owners and a channel for notifications. A linked browser workspace handles template selection, long-form review, and approvals. Customers and field staff open mobile-friendly browser links. Completing surveys entirely inside WhatsApp is a separate future surface.
-- OpenUI means the Thesys open-source generative UI framework. Its suitability for controlled, persistent form state must be verified before adoption.
+- Owners use a browser workspace for creation, review, and approvals. Workers open mobile-friendly browser links. WhatsApp integration was removed from the MVP.
+- The implementation uses Vercel json-render with controlled React components. Earlier OpenUI references below record the initial research option.
 - Initial candidates are mystery-shopping operators, and visual merchandising auditors; later on web forms remain a very big and powerful market (for embedding on websites for booking, signups, appointments, surveys etc)
 - Forms may execute registered model capabilities. The exact browser models and hosted NVIDIA model IDs are selected through compatibility and quality tests.
 - The owner reviews publication and material business-rule changes. Later automatic publication can be limited to explicitly authorized change categories.

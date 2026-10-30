@@ -1,26 +1,68 @@
-# Adaptive Forms
+# Fieldnote
 
-An adaptive survey platform for small businesses, starting with equipment site surveys. The planned workflow turns templates into forms, checks submitted evidence, and proposes evaluated improvements for owner approval.
+Adaptive site updates for small contractors. Create a workflow, collect a worker’s report, see what’s missing, and publish an evaluated improvement for the next visit.
 
-Built for the [Nebius x NVIDIA Global AI Hackathon](https://nebiusglobalaihackathon.devpost.com/).
+Built for the [Nebius × NVIDIA Global AI Hackathon](https://nebiusglobalaihackathon.devpost.com/).
 
-## Status
+## What works
 
-Planning stage. No runnable application or measured results yet. Demo, screenshots, and evaluation results will be added as implementation progresses.
+- Template-based creation, preview, checks, and explicit publication.
+- Voice/text updates, editable interpretation, conditional questions, and photo evidence.
+- Response summaries with original notes, evidence exceptions, and office review.
+- Feedback-driven revisions, immutable versions, pinned sessions, and rollback.
+- Separate contract regression checks and a runnable offline DSPy/GEPA experiment.
 
-## Planned stack
+## Run locally
 
-- Python API and workers; React browser interface.
-- NVIDIA Nemotron through Nebius Token Factory for form generation and revisions.
-- DSPy programs optimized with GEPA, evaluated against held-out examples.
-- Versioned forms, evidence checks, and explicit publication approval.
+Requires Python 3.12, [uv](https://docs.astral.sh/uv/), and Node.js 22+.
 
-## Setup
+```bash
+uv sync --python 3.12
+npm --prefix web ci
+cp .env.example .env
+./scripts/dev.sh
+```
 
-There are no dependencies to install or application commands to run yet. Token Factory credits have been claimed; API access and model compatibility still need verification. Installation, environment configuration, test, and run commands will be documented alongside the first working implementation. Never commit API credentials.
+Open **http://127.0.0.1:5173**. Choose **Load sample workspace** to explore labeled examples, or **Create form** to start fresh. Data persists under `.data/`.
 
-## Documentation
+For a single-server build:
 
-Planning documents are being reviewed locally and will be committed separately under `docs/`: product requirements, technical decisions, and hackathon rules/resources.
+```bash
+npm --prefix web run build
+.venv/bin/python scripts/serve.py
+```
 
-An open-source license will be selected and added before submission.
+Open **http://127.0.0.1:8000**. Stop the development API first if it already uses that port.
+
+## Connect AI
+
+Set `NEBIUS_API_KEY` and a verified `NEBIUS_MODEL` in `.env`, then restart the server. NVIDIA Nemotron runs through Nebius Token Factory for generation, interpretation, and revision proposals. Configure `VISION_MODEL` for a compatible vision endpoint; optional `VISION_BASE_URL` and `VISION_API_KEY` override the Nebius connection.
+
+Without credentials, the app clearly labels **local demo mode**: curated templates and deterministic interpretation rules. Provider failures never silently fall back to demo results. Without vision access, photos are retained for human review. Browser voice recognition depends on browser support and permission; it is not NVIDIA transcription.
+
+## Verify
+
+```bash
+.venv/bin/python -m pytest -q
+npm --prefix web run build
+# Requires live Nebius access; incurs inference usage, never auto-publishes:
+.venv/bin/python -m evals.optimize --max-metric-calls 18 --max-seconds 600
+```
+
+The experiment compares baseline and GEPA candidate on separate synthetic held-out examples. Its report appears under **Improvements**; it is not a production reliability claim. A failed or unimproved candidate does not replace the runtime program.
+
+## Architecture and limits
+
+React/Vite + Vercel json-render; FastAPI + SQLAlchemy; DSPy + GEPA. SQLite is the default. `DATABASE_URL` can target PostgreSQL/Neon; that deployment path has not yet been tested. Form revisions are versioned data, not database schema migrations.
+
+This is a single-workspace prototype. Set `OWNER_TOKEN` before external exposure; worker links/session IDs act as bearer access. Photos require office review, model thresholds are not calibrated, and live model/voice/device testing depends on configured services. No WhatsApp integration, browser model training, or arbitrary generated-code execution.
+
+## Project notes
+
+- [Demo journey](docs/DEMO_USER_JOURNEY.md)
+- [Current build decisions](docs/BUILD_DECISIONS.md)
+- [Technical decisions and evaluation plan](docs/TECHNICAL_DECISIONS.md)
+- [Full product vision](docs/PRD.md)
+- [Hackathon rules and resources](docs/HACKATHON_OVERVIEW.md)
+
+Screenshots, a hosted demo, and the submission video will be linked after review. Open-source license selection remains pending before public submission.

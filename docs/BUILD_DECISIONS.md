@@ -5,7 +5,7 @@
 - The approved journey is daily renovation-site updates, with a wrong-material delivery triggering an owner-approved evidence branch.
 - Web only. No WhatsApp integration.
 - Working product name: Fieldnote. React/Vite interface and Python/FastAPI service.
-- Use a constrained JSON component renderer; assess Vercel json-render against the form contract. No generated JavaScript execution.
+- Use Vercel json-render 0.21.3 with registered React components and a typed form contract. Preview and runtime conditional questions use this renderer. No generated JavaScript execution.
 - Keep form versions as immutable JSON records, not database schema migrations. A new branch is an application-data revision.
 - SQLite provides a zero-account local review setup. SQLAlchemy keeps the storage model compatible with PostgreSQL/Neon through DATABASE_URL. Neon branching is useful for infrastructure migration tests, not required for each form revision. TypeDB is deferred because relational version records and typed contracts cover this slice.
 - DSPy defines typed intelligent capabilities; GEPA runs as a separate bounded experiment. Evaluation and approval remain explicit operations.

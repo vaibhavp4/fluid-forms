@@ -1,0 +1,29 @@
+{
+  "description": "Prepared synthetic examples for a small offline experiment. Not customer telemetry or a production reliability claim.",
+  "train": [
+    {"id":"t1","note":"Wrong tiles arrived and we cannot tile the bathroom.","issue":"wrong_material"},
+    {"id":"t2","note":"Rain stopped the outside painting.","issue":"weather"},
+    {"id":"t3","note":"All work finished as planned.","issue":"none"},
+    {"id":"t4","note":"The correct timber arrived two hours late.","issue":"late_delivery"},
+    {"id":"t5","note":"The supplier almost sent wrong bricks but corrected the order before delivery. Work went ahead.","issue":"none"},
+    {"id":"t6","note":"We cannot continue because the access gate is locked.","issue":"other"}
+  ],
+  "dev": [
+    {"id":"d1","note":"Delivery contains the incorrect boards. Need replacement boards.","issue":"wrong_material"},
+    {"id":"d2","note":"A storm meant we had to stop roof work.","issue":"weather"},
+    {"id":"d3","note":"First fix complete, ready for plastering.","issue":"none"},
+    {"id":"d4","note":"If wrong tiles arrive tomorrow we will call the supplier. Today is on track.","issue":"none"},
+    {"id":"d5","note":"Delivery was delayed until afternoon, but the contents match the order.","issue":"late_delivery"},
+    {"id":"d6","note":"Something about the delivery looks odd but I haven't checked it yet.","issue":"uncertain"}
+  ],
+  "test": [
+    {"id":"h1","note":"We ordered blue wall panels; the delivery contains red ones. Installation is blocked.","issue":"wrong_material"},
+    {"id":"h2","note":"High winds prevented us from lifting materials onto the roof.","issue":"weather"},
+    {"id":"h3","note":"The tiling and cleanup are complete. Nothing needed from the office.","issue":"none"},
+    {"id":"h4","note":"Wrong tiles arrived yesterday. They were replaced this morning and tiling is complete.","issue":"none"},
+    {"id":"h5","note":"The right bricks turned up at noon instead of eight, delaying our start.","issue":"late_delivery"},
+    {"id":"h6","note":"The electrician was unavailable so we cannot close the ceiling.","issue":"other"},
+    {"id":"h7","note":"I cannot tell whether the box is our delivery or another contractor's.","issue":"uncertain"},
+    {"id":"h8","note":"The label says a different size from our order. We checked the contents and need them exchanged.","issue":"wrong_material"}
+  ]
+}
