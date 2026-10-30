@@ -9,7 +9,15 @@ from datetime import date
 from dotenv import load_dotenv
 
 load_dotenv()
-from fastapi import FastAPI, HTTPException, Depends, Header, UploadFile, File
+from fastapi import (
+    FastAPI,
+    HTTPException,
+    Depends,
+    Header,
+    UploadFile,
+    File,
+    Form as UploadForm,
+)
 from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.exc import IntegrityError
 from fastapi.staticfiles import StaticFiles
@@ -303,14 +311,29 @@ def save(session_id: str, body: SaveSession):
         last = session.data.get("last_interpretation")
         if not last or last["note"] != body.note:
             raise HTTPException(409, "Review the updated note before saving")
-        session.data = {**session.data, "answers": body.model_dump(mode="json")}
+        photo = session.data.get("photo")
+        history = session.data.get("photo_history", [])
+        if photo and photo.get("site") != body.site:
+            history = history + [photo]
+            photo = None
+        session.data = {
+            **session.data,
+            "answers": body.model_dump(mode="json"),
+            "photo": photo,
+            "photo_history": history,
+        }
         return store.serial(session)
 
 
 @app.post("/api/sessions/{session_id}/photo")
-async def photo(session_id: str, file: UploadFile = File(...)):
+async def photo(
+    session_id: str, file: UploadFile = File(...), site: str = UploadForm(...)
+):
     with store.Session() as db:
-        mutable(get(db, session_id, "session"))
+        current = get(db, session_id, "session")
+        mutable(current)
+        if site not in current.data["spec"]["sites"]:
+            raise HTTPException(422, "Choose a site from this form before uploading")
     raw = await file.read(8 * 1024 * 1024 + 1)
     if len(raw) > 8 * 1024 * 1024:
         raise HTTPException(413, "Use a photo smaller than 8 MB")
@@ -351,7 +374,10 @@ async def photo(session_id: str, file: UploadFile = File(...)):
         (MEDIA / f"{media_id}.jpg").write_bytes(normalized)
         session.data = {
             **session.data,
+            "photo_history": session.data.get("photo_history", [])
+            + ([session.data["photo"]] if session.data.get("photo") else []),
             "photo": {
+                "site": site,
                 "id": media_id,
                 "hash": hashlib.sha256(normalized).hexdigest(),
                 "observation": observation,
@@ -387,6 +413,11 @@ def submit(session_id: str):
         if data.interpretation.issue not in ["none", "uncertain"] and not data.arranged:
             raise HTTPException(422, "Tell us whether the next step has been arranged")
         evidence = session.data.get("photo")
+        if evidence and evidence.get("site") != data.site:
+            raise HTTPException(
+                409,
+                "This photo belongs to a different site. Upload evidence for the selected site.",
+            )
         if needed and not evidence and len(data.exception.strip()) < 5:
             raise HTTPException(
                 422, "Add delivery evidence or explain why it cannot be obtained"

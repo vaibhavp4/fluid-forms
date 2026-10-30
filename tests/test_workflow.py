@@ -147,7 +147,9 @@ def test_upload_rejects_fake_image_and_retains_pending_real_image():
     endpoint = f"/api/sessions/{session['id']}/photo"
     assert (
         client.post(
-            endpoint, files={"file": ("photo.jpg", b"not an image", "image/jpeg")}
+            endpoint,
+            data={"site": "Elm House"},
+            files={"file": ("photo.jpg", b"not an image", "image/jpeg")},
         ).status_code
         == 422
     )
@@ -155,7 +157,9 @@ def test_upload_rejects_fake_image_and_retains_pending_real_image():
     buffer = io.BytesIO()
     image.save(buffer, format="PNG")
     result = client.post(
-        endpoint, files={"file": ("photo.png", buffer.getvalue(), "image/png")}
+        endpoint,
+        data={"site": "Elm House"},
+        files={"file": ("photo.png", buffer.getvalue(), "image/png")},
     )
     assert result.status_code == 200
     assert result.json()["observation"]["status"] == "review"
@@ -233,3 +237,44 @@ def test_experiment_split_manifest_is_disjoint():
         notes.extend(r["note"] for r in data[split])
     assert len(ids) == len(set(ids))
     assert len(notes) == len(set(notes))
+
+
+def test_site_change_invalidates_photo_but_preserves_history():
+    import io
+    from PIL import Image
+
+    form, _ = published()
+    proposal = client.post(
+        f"/api/forms/{form['id']}/proposals",
+        json={"feedback": "Require a photo for wrong deliveries."},
+    ).json()
+    client.post(f"/api/proposals/{proposal['id']}/evaluate")
+    client.post(
+        f"/api/proposals/{proposal['id']}/publish",
+        json={"artifact_hash": proposal["hash"]},
+    )
+    session = start(form)
+    fill(session)
+    buffer = io.BytesIO()
+    Image.new("RGB", (200, 200)).save(buffer, format="PNG")
+    endpoint = f"/api/sessions/{session['id']}/photo"
+    uploaded = client.post(
+        endpoint,
+        data={"site": "Elm House"},
+        files={"file": ("photo.png", buffer.getvalue(), "image/png")},
+    )
+    assert uploaded.status_code == 200
+    payload = client.get(f"/api/sessions/{session['id']}").json()["answers"]
+    payload["site"] = "Oak Avenue"
+    saved = client.put(f"/api/sessions/{session['id']}", json=payload).json()
+    assert saved["photo"] is None
+    assert saved["photo_history"][-1]["site"] == "Elm House"
+    assert client.post(f"/api/sessions/{session['id']}/submit").status_code == 422
+    assert (
+        client.post(
+            endpoint,
+            data={"site": "Unknown site"},
+            files={"file": ("photo.png", buffer.getvalue(), "image/png")},
+        ).status_code
+        == 422
+    )

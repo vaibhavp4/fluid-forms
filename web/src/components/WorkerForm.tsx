@@ -307,6 +307,7 @@ export function WorkerForm({
     try {
       const data = new FormData();
       data.append("file", file);
+      data.append("site", site);
       setPhoto(await api<Photo>(`/sessions/${session.id}/photo`, "POST", data));
     } catch (e) {
       setError(errorMessage(e));
@@ -424,7 +425,15 @@ export function WorkerForm({
           </label>
           <label>
             Site
-            <select value={site} onChange={(e) => setSite(e.target.value)}>
+            <select
+              value={site}
+              disabled={busy === "photo"}
+              onChange={(e) => {
+                setSite(e.target.value);
+                setPhoto(null);
+                setException("");
+              }}
+            >
               {session.spec.sites.map((s) => (
                 <option key={s}>{s}</option>
               ))}
